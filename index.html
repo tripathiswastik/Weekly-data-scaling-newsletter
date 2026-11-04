@@ -90,7 +90,7 @@
       <p class="dek">One question, every week: when does scaling training data improve deep learning—and when do quality, repetition, compute, or infrastructure change the answer?</p>
     </section>
 
-    <div class="issuebar"><span>THIS WEEK <strong id="issue-date">Loading edition…</strong></span><span id="next-date">Next brief: calculating…</span></div>
+    <div class="issuebar"><span><strong id="issue-number">ISSUE #1</strong> <time id="issue-date" datetime="2026-11-02">· Mon, Nov 2, 2026</time></span><span id="next-date">Next brief: Monday edition</span></div>
 
     <article class="feature-story" aria-labelledby="feature-title">
       <header class="story-head">
@@ -156,9 +156,9 @@
         <p>What is the best takeaway from current evidence on scaling training datasets?</p>
         <fieldset class="mcq" aria-describedby="answer-feedback">
           <legend class="sr-only">Choose one answer</legend>
-          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">A. More tokens always improve performance, regardless of data quality.</button>
-          <button class="mcq-option" type="button" data-correct="true" aria-pressed="false">B. Quality, repetition, task, and compute budget affect the value of more data.</button>
-          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">C. Keep only the highest-quality examples, no matter how often they repeat.</button>
+          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">A. Use one strict quality filter; the best-ranked data stays optimal as the run scales.</button>
+          <button class="mcq-option" type="button" data-correct="true" aria-pressed="false">B. Tune the mixture to the task and compute budget; track novelty, repetition, and held-out gains.</button>
+          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">C. Once examples are high quality, repeating them is a reliable substitute for fresh data.</button>
         </fieldset>
         <p class="answer-feedback" id="answer-feedback" role="status" aria-live="polite">Choose an answer to see feedback.</p>
       </article>
@@ -175,7 +175,7 @@
     const todayUtc = new Date(Date.UTC(part('year'), part('month') - 1, part('day')));
     const monday = new Date(todayUtc);
     monday.setUTCDate(todayUtc.getUTCDate() - ((todayUtc.getUTCDay() + 6) % 7));
-    const nextMonday = new Date(monday);
+    const issueStart = new Date(Date.UTC(2026, 10, 2));\n    const issueNumber = Math.max(1, Math.floor((monday.getTime() - issueStart.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1);\n    document.getElementById('issue-number').textContent = `ISSUE #${issueNumber}`;\n    const issueDate = document.getElementById('issue-date');\n    issueDate.textContent = `· ${fmt(monday)}`;\n    issueDate.dateTime = monday.toISOString().slice(0, 10);\n    const nextMonday = new Date(monday);
     nextMonday.setUTCDate(monday.getUTCDate() + 7);
     const fmt = date => new Intl.DateTimeFormat(undefined, { timeZone: zone, weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' }).format(date);
     document.getElementById('issue-date').textContent = fmt(monday);
@@ -193,8 +193,8 @@
       option.setAttribute('aria-pressed', 'true');
       feedback.className = `answer-feedback ${isCorrect ? 'correct' : 'incorrect'}`;
       feedback.textContent = isCorrect
-        ? 'Correct. The best data mix depends on quality, repetition, task, and compute budget.'
-        : 'Not quite. Current studies show that quality, repetition, task, and compute budget all matter.';
+        ? 'Correct. Match the mix to the task and budget, then measure new information and held-out gains.'
+        : 'Not quite. A quality ranking can change with scale, and repeated examples can lose marginal value. Recheck the mix against the run and task.';
     }));
   </script>
 </body>
