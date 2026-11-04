@@ -41,11 +41,21 @@
     .quote-card cite { color:var(--muted); font-size:12px; font-style:normal; }
     .reader-question { grid-column:span 2; background:var(--ink); color:#fff; }
     .reader-question p { margin:10px 0 0; color:#e2e9e4; font-size:18px; line-height:1.45; }
+    .mcq { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr)); gap:10px; margin:18px 0 0; padding:0; border:0; }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    .mcq-option { min-width:0; min-height:64px; padding:14px 16px; border:1px solid #65786f; border-radius:8px; background:#22352d; color:#fff; font:inherit; font-size:clamp(14px,1.7vw,16px); line-height:1.4; text-align:left; cursor:pointer; transition:background-color .16s ease,border-color .16s ease,transform .16s ease; overflow-wrap:anywhere; }
+    .mcq-option:hover { background:#2b4438; transform:translateY(-1px); }
+    .mcq-option:focus-visible { outline:3px solid var(--lime); outline-offset:2px; }
+    .mcq-option.is-correct { background:#d9f3df; border-color:#54a96a; color:#14391d; }
+    .mcq-option.is-incorrect { background:#ffe0dc; border-color:#d86a5c; color:#5d1d15; }
+    .answer-feedback { min-height:1.5em; margin:12px 0 0!important; color:#e2e9e4; font-size:14px!important; }
+    .answer-feedback.correct { color:#c3f1ca; }
+    .answer-feedback.incorrect { color:#ffc5bd; }
     .community { display:flex; align-items:center; justify-content:space-between; gap:18px; padding:21px 24px; margin-top:14px; border:1px solid var(--line); border-radius:10px; background:var(--card); }
     .community p { margin:4px 0 0; color:var(--muted); font-size:13px; }
     .community a { font-size:13px; font-weight:750; white-space:normal; overflow-wrap:anywhere; }
     footer { display:flex; justify-content:space-between; gap:12px; margin-top:23px; color:var(--muted); font-size:11px; }
-    @media(max-width:720px) { .shell{padding:19px 16px 48px}.hero{grid-template-columns:1fr;gap:20px;padding:46px 0 30px}.dek{max-width:520px}.lead,.side,.small,.wide{grid-column:span 12;min-height:unset}.lead{min-height:270px}.community{align-items:flex-start;flex-direction:column}.insights{grid-template-columns:1fr}.reader-question{grid-column:span 1}.schedule{text-align:right} }
+    @media(max-width:720px) { .shell{padding:19px 16px 48px}.hero{grid-template-columns:1fr;gap:20px;padding:46px 0 30px}.dek{max-width:520px}.lead,.side,.small,.wide{grid-column:span 12;min-height:unset}.lead{min-height:270px}.community{align-items:flex-start;flex-direction:column}.insights{grid-template-columns:1fr}.reader-question{grid-column:span 1}.mcq{grid-template-columns:minmax(0,1fr)}.schedule{text-align:right} }
   </style>
 </head>
 <body>
@@ -102,7 +112,14 @@
       </article>
       <article class="reader-question">
         <span class="tag">Reader question</span>
-        <p>When you scale a training dataset, what do you measure to tell whether the new data is worth its cost?</p>
+        <p>What is the best takeaway from current evidence on scaling training datasets?</p>
+        <fieldset class="mcq" aria-describedby="answer-feedback">
+          <legend class="sr-only">Choose one answer</legend>
+          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">A. More tokens always improve performance, regardless of data quality.</button>
+          <button class="mcq-option" type="button" data-correct="true" aria-pressed="false">B. Quality, repetition, task, and compute budget affect the value of more data.</button>
+          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">C. Keep only the highest-quality examples, no matter how often they repeat.</button>
+        </fieldset>
+        <p class="answer-feedback" id="answer-feedback" role="status" aria-live="polite">Choose an answer to see feedback.</p>
       </article>
     </section>
 
@@ -123,6 +140,21 @@
     document.getElementById('issue-date').textContent = fmt(monday);
     document.getElementById('edition-label').textContent = `Weekly field notes · ${fmt(monday)}`;
     document.getElementById('next-date').textContent = `Next brief: ${fmt(nextMonday)}`;
+    const options = [...document.querySelectorAll('.mcq-option')];
+    const feedback = document.getElementById('answer-feedback');
+    options.forEach(option => option.addEventListener('click', () => {
+      options.forEach(item => {
+        item.classList.remove('is-correct', 'is-incorrect');
+        item.setAttribute('aria-pressed', 'false');
+      });
+      const isCorrect = option.dataset.correct === 'true';
+      option.classList.add(isCorrect ? 'is-correct' : 'is-incorrect');
+      option.setAttribute('aria-pressed', 'true');
+      feedback.className = `answer-feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+      feedback.textContent = isCorrect
+        ? 'Correct. The best data mix depends on quality, repetition, task, and compute budget.'
+        : 'Not quite. Current studies show that quality, repetition, task, and compute budget all matter.';
+    }));
   </script>
 </body>
 </html>
