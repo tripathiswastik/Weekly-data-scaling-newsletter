@@ -35,6 +35,12 @@
     .why b { color:var(--green); }
     .source { margin-top:15px!important; font-size:12px!important; }
     .number { color:var(--orange); font-weight:800; font-size:12px; letter-spacing:.1em; }
+    .insights { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px; }
+    .quote-card, .reader-question { padding:22px 24px; border:1px solid var(--line); border-radius:10px; background:var(--card); }
+    .quote-card blockquote { margin:12px 0; font-size:20px; line-height:1.35; letter-spacing:-.025em; }
+    .quote-card cite { color:var(--muted); font-size:12px; font-style:normal; }
+    .reader-question { grid-column:span 2; background:var(--ink); color:#fff; }
+    .reader-question p { margin:10px 0 0; color:#e2e9e4; font-size:18px; line-height:1.45; }
     .community { display:flex; align-items:center; justify-content:space-between; gap:18px; padding:21px 24px; margin-top:14px; border:1px solid var(--line); border-radius:10px; background:var(--card); }
     .community p { margin:4px 0 0; color:var(--muted); font-size:13px; }
     .community a { font-size:13px; font-weight:750; white-space:nowrap; }
@@ -80,6 +86,23 @@
 
       <article class="card wide">
         <span class="tag">After review · practical direction</span><h2>Make the data mix measurable and revisable</h2><p>Recent research does not establish one universally best dataset size. It points instead to a task- and budget-dependent choice among data quality, coverage, repetition, and compute. As a practical inference, compare data mixtures on held-out evaluations and record the marginal gain per added unit of data and processing cost.</p><p class="why"><b>Why this matters:</b> A decision log lets the next training run build on measured results instead of repeating a scale-first assumption.</p>
+      </article>
+    </section>
+
+    <section class="insights" aria-label="Quotes and reader question">
+      <article class="quote-card">
+        <span class="tag">Quote 01 · ICLR 2026</span>
+        <blockquote>“Data quality ranking is scale and resource-dependent.”</blockquote>
+        <cite>— Ardalani et al., <a href="https://proceedings.iclr.cc/paper_files/paper/2026/hash/6544c0b53cc1ea51d0c7086b536830a8-Abstract-Conference.html">How Text Quality Interventions Reshape Neural Scaling Laws</a></cite>
+      </article>
+      <article class="quote-card">
+        <span class="tag">Quote 02 · ICML 2026</span>
+        <blockquote>“Repetition induces scale-dependent diminishing returns.”</blockquote>
+        <cite>— Zhou et al., <a href="https://proceedings.mlr.press/v306/zhou26af.html">InfoLaw</a></cite>
+      </article>
+      <article class="reader-question">
+        <span class="tag">Reader question</span>
+        <p>When you scale a training dataset, what do you measure to tell whether the new data is worth its cost?</p>
       </article>
     </section>
 
