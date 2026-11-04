@@ -135,4 +135,3 @@ This project is open-source and licensed under the [MIT License](LICENSE).
 ## 🏷️ Repository Metadata & Topic Tags
 - **About Description**: Weekly research brief analyzing neural scaling laws, training data quality vs. quantity tradeoffs, and compute-optimal pretraining mixtures.
 - **Core Topics**: `deep-learning` `data-scaling` `scaling-laws` `pretraining` `llm-data` `ai-research` `newsletter` `github-pages` `machine-learning`
-- **Governance**: Follows [Antigravity AI Rules](file:///d:/ag-ai/.agents/rules/antigravity-rules.md) and [Multi-Agent SDLC Contracts](file:///d:/ag-ai/.agents/rules/multi-agent-prompts.md).
