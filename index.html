@@ -175,10 +175,15 @@
     const todayUtc = new Date(Date.UTC(part('year'), part('month') - 1, part('day')));
     const monday = new Date(todayUtc);
     monday.setUTCDate(todayUtc.getUTCDate() - ((todayUtc.getUTCDay() + 6) % 7));
-    const issueStart = new Date(Date.UTC(2026, 10, 2));\n    const issueNumber = Math.max(1, Math.floor((monday.getTime() - issueStart.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1);\n    document.getElementById('issue-number').textContent = `ISSUE #${issueNumber}`;\n    const issueDate = document.getElementById('issue-date');\n    issueDate.textContent = `· ${fmt(monday)}`;\n    issueDate.dateTime = monday.toISOString().slice(0, 10);\n    const nextMonday = new Date(monday);
+    const nextMonday = new Date(monday);
     nextMonday.setUTCDate(monday.getUTCDate() + 7);
     const fmt = date => new Intl.DateTimeFormat(undefined, { timeZone: zone, weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' }).format(date);
-    document.getElementById('issue-date').textContent = fmt(monday);
+    const issueStart = new Date(Date.UTC(2026, 10, 2));
+    const issueNumber = Math.max(1, Math.floor((monday.getTime() - issueStart.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1);
+    document.getElementById('issue-number').textContent = `ISSUE #${issueNumber}`;
+    const issueDate = document.getElementById('issue-date');
+    issueDate.textContent = `· ${fmt(monday)}`;
+    issueDate.dateTime = monday.toISOString().slice(0, 10);
     document.getElementById('edition-label').textContent = `Weekly field notes · ${fmt(monday)}`;
     document.getElementById('next-date').textContent = `Next brief: ${fmt(nextMonday)}`;
     const options = [...document.querySelectorAll('.mcq-option')];
