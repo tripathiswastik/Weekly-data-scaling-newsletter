@@ -22,6 +22,23 @@
     .dek { max-width:390px; margin:0 0 5px; color:var(--muted); font-size:17px; line-height:1.55; }
     .issuebar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:13px 16px; background:var(--ink); color:white; border-radius:9px; font-size:13px; }
     .issuebar strong { color:var(--lime); }
+    .feature-story { margin-top:14px; overflow:hidden; border:1px solid #cfd8ce; border-radius:14px; background:var(--card); box-shadow:0 14px 38px rgba(23,37,31,.07); }
+    .story-head { padding:clamp(26px,5vw,58px); background:var(--ink); color:#fff; }
+    .story-meta { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:22px; color:#dce6df; font-size:12px; }
+    .story-meta .tag { background:var(--lime); color:var(--ink); }
+    .read-time { padding:6px 9px; border:1px solid #72847a; border-radius:999px; }
+    .story-head h2 { max-width:900px; margin:0; color:#fff; font-size:clamp(34px,6vw,66px); line-height:1.02; letter-spacing:-.055em; }
+    .story-dek { max-width:820px; margin:18px 0 0; color:#dce6df; font-size:clamp(17px,2vw,21px); line-height:1.55; }
+    .story-content { max-width:950px; margin:0 auto; padding:clamp(24px,5vw,58px); }
+    .story-content h3 { margin:30px 0 8px; font-size:clamp(20px,2.5vw,27px); letter-spacing:-.035em; }
+    .story-content p { margin:12px 0; color:#43534b; font-size:clamp(16px,1.5vw,18px); line-height:1.75; }
+    .story-content a { font-weight:650; }
+    .takeaway-box { margin-top:28px; padding:clamp(18px,3vw,28px); border:1px solid #d8e0d1; border-radius:10px; background:#edf2e6; }
+    .takeaway-box h3 { margin:0 0 12px; }
+    .takeaway-box ul { margin:0; padding-left:22px; color:#35483d; }
+    .takeaway-box li { padding:5px 0 5px 4px; font-size:16px; line-height:1.55; }
+    .story-close { margin-top:24px!important; padding:18px 20px; border-left:4px solid var(--orange); background:#f5eee7; }
+    .section-label { grid-column:1/-1; margin:12px 0 0; color:var(--muted); font-size:12px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
     .grid { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:clamp(10px,1.5vw,14px); margin-top:14px; }
     .card { min-width:0; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:clamp(18px,2.5vw,24px); }
     .lead { grid-column:span 6; min-height:300px; display:flex; flex-direction:column; justify-content:space-between; background:#e9efdf; border-color:#d5dfca; }
@@ -75,27 +92,51 @@
 
     <div class="issuebar"><span>THIS WEEK <strong id="issue-date">Loading edition…</strong></span><span id="next-date">Next brief: calculating…</span></div>
 
-    <section class="grid" aria-label="This week's research">
-      <article class="card lead">
-        <div><span class="tag">Research · hidden costs</span><h2>Filtering changes the compute equation</h2><p>An ICLR 2026 study finds that deduplication, heuristic filtering, and LLM-guided rewriting can shift compute-optimal token-to-parameter ratios by orders of magnitude. Curation is part of the training strategy: it changes which data and compute budget make sense.</p></div>
-        <div><p class="why"><b>Why this matters:</b> Measure the curation pipeline and training run together; “dataset size” alone can hide the real cost-performance tradeoff.</p><p class="source"><a href="https://proceedings.iclr.cc/paper_files/paper/2026/hash/6544c0b53cc1ea51d0c7086b536830a8-Abstract-Conference.html">Read the ICLR 2026 paper ↗</a></p></div>
-      </article>
+    <article class="feature-story" aria-labelledby="feature-title">
+      <header class="story-head">
+        <div class="story-meta"><span class="tag">This week’s feature · research deep dive</span><span class="read-time">3 minute read</span></div>
+        <h2 id="feature-title">The hidden cost of “just add more data”</h2>
+        <p class="story-dek">More examples can improve a model, but the same number of tokens can deliver very different value depending on what they contain, how often they repeat, and how much compute you can spend.</p>
+      </header>
+      <div class="story-content">
+        <p>“Add more data” is attractive advice because dataset size is easy to count. But size alone says little about how much useful, new information a training run receives. A recent large-scale study of language-model pretraining makes that gap concrete: data preparation can change the scaling curve itself.</p>
 
-      <article class="card side">
-        <div><span class="tag">Myth buster · repetition</span><h2>“Higher quality” can still mean worse returns</h2><p>An ICML 2026 paper reports that upweighting high-quality data may hurt in data-limited, overtrained regimes when it causes excessive repetition.</p></div>
-        <div><p class="why"><b>Why this matters:</b> Track repeats and validation learning curves when fresh data is scarce.</p><p class="source"><a href="https://proceedings.mlr.press/v306/zhou26af.html">Read InfoLaw (ICML 2026) ↗</a></p></div>
-      </article>
+        <h3>Filtering changes the training equation</h3>
+        <p>At ICLR 2026, Ardalani and colleagues studied 23 curated datasets and trained more than 2,000 models, ranging from 100 million to 8 billion parameters and 100 million to 200 billion tokens. They compared interventions including deduplication, heuristic filtering, and model-guided rewriting. Those choices shifted both the coefficients and exponents of fitted scaling laws. The compute-optimal balance between tokens and parameters varied by orders of magnitude across interventions. In the authors’ words, <a href="https://proceedings.iclr.cc/paper_files/paper/2026/hash/6544c0b53cc1ea51d0c7086b536830a8-Abstract-Conference.html">“data quality ranking is scale and resource-dependent.”</a></p>
 
+        <p>That finding does not mean “filter everything as aggressively as possible.” Filtering changes the supply of examples available for training. If the remaining pool is small, a long run may cycle through the same material again and again.</p>
+
+        <h3>Cleaner data can still be overused</h3>
+        <p>An ICML 2026 study, InfoLaw, models how data quality, mixture weights, and repetition affect information gained during pretraining. It reports that in data-limited, overtrained settings, strongly upweighting high-quality data can increase repetition enough to degrade performance. The authors summarize one mechanism as <a href="https://proceedings.mlr.press/v306/zhou26af.html">“repetition induces scale-dependent diminishing returns.”</a> The lesson is a balance: low-quality data may waste compute, while repeatedly reusing a narrow high-quality pool can also lose value.</p>
+
+        <h3>Choose the data mix for the run you can afford</h3>
+        <p>So the useful question is not simply “How large can the dataset get?” It is “At this compute budget, which mixture gives the best measured improvement on the task I care about?” That answer can change with model size, training duration, domain, and how much genuinely new data is available. The studies above concern language-model pretraining; treat their specific scaling results as evidence for that setting, not a universal law for every deep-learning task.</p>
+
+        <section class="takeaway-box" aria-label="Bulleted breakdown">
+          <h3>Bulleted breakdown</h3>
+          <ul>
+            <li><strong>Count new information, not only tokens.</strong> Deduplication and source diversity help reveal whether added volume brings new coverage.</li>
+            <li><strong>Track repeats.</strong> A small clean dataset can become less useful when the training run reuses it too often.</li>
+            <li><strong>Compare under the same budget.</strong> Evaluate curated and larger mixtures with matched model, compute, and held-out tests.</li>
+            <li><strong>Measure the marginal gain.</strong> Record validation improvement alongside the cost of sourcing, filtering, storing, and processing the extra data.</li>
+            <li><strong>Make the choice task-specific.</strong> A dataset mix that helps one capability or domain may not be best for another.</li>
+          </ul>
+        </section>
+
+        <p class="story-close"><strong>The takeaway:</strong> Scaling data can help, but “more” is not a strategy by itself. Treat data quality, repetition, and compute as parts of one experiment—and keep the mixture that earns its cost on the evaluation that matters.</p>
+      </div>
+    </article>
+
+    <section class="grid" aria-label="Supporting stories">
+      <h2 class="section-label">More signals from this week</h2>
       <article class="card small">
         <span class="number">01 / UNDERDOG</span><h2>Small data can be a smart baseline</h2><p>An ICML 2026 study finds that repeating a smaller dataset can speed learning in some settings. It is a conditional result, not a universal recipe.</p><p class="why"><b>Why this matters:</b> Compare a well-chosen small set against the cost of sourcing and processing more examples.</p><p class="source"><a href="https://proceedings.mlr.press/v306/liu26ad.html">Read the study ↗</a></p>
       </article>
-
       <article class="card small">
         <span class="number">02 / PRODUCTION LESSON</span><h2>The data loader is part of the attack surface</h2><p>Hugging Face’s 2026 intrusion timeline describes abuse of dataset-processing paths, including unsafe handling of HDF5 external references and template expressions in data fields.</p><p class="why"><b>Why this matters:</b> Treat training data and configs as untrusted input, and isolate processing workers.</p><p class="source"><a href="https://huggingface.co/blog/agent-intrusion-technical-timeline">Read Hugging Face’s technical timeline ↗</a></p>
       </article>
-
       <article class="card wide">
-        <span class="tag">After review · practical direction</span><h2>Make the data mix measurable and revisable</h2><p>Recent research does not establish one universally best dataset size. It points instead to a task- and budget-dependent choice among data quality, coverage, repetition, and compute. As a practical inference, compare data mixtures on held-out evaluations and record the marginal gain per added unit of data and processing cost.</p><p class="why"><b>Why this matters:</b> A decision log lets the next training run build on measured results instead of repeating a scale-first assumption.</p>
+        <span class="tag">After review · practical direction</span><h2>Make the data mix measurable and revisable</h2><p>As a practical inference from this week’s evidence, compare data mixtures on held-out evaluations and record the marginal gain per added unit of data and processing cost.</p><p class="why"><b>Why this matters:</b> A decision log lets the next training run build on measured results instead of repeating a scale-first assumption.</p>
       </article>
     </section>
 
