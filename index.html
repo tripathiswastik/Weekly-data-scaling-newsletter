@@ -22,6 +22,9 @@
     .dek { max-width:390px; margin:0 0 5px; color:var(--muted); font-size:17px; line-height:1.55; }
     .issuebar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:13px 16px; background:var(--ink); color:white; border-radius:9px; font-size:13px; }
     .issuebar strong { color:var(--lime); }
+    .jump-links { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 4px; }
+    .jump-links a { display:inline-flex; align-items:center; padding:8px 12px; border:1px solid var(--line); border-radius:999px; background:var(--card); color:var(--ink); font-size:12px; font-weight:700; text-decoration:none; transition:background-color .15s ease,border-color .15s ease; }
+    .jump-links a:hover,.jump-links a:focus-visible { background:#e9efdf; border-color:#a7b9a6; outline:none; }
     .feature-story { margin-top:14px; overflow:hidden; border:1px solid #cfd8ce; border-radius:14px; background:var(--card); box-shadow:0 14px 38px rgba(23,37,31,.07); }
     .story-head { display:block; padding:clamp(26px,5vw,58px); background:var(--ink); color:#fff; }
     .story-meta { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:22px; color:#dce6df; font-size:12px; }
@@ -92,7 +95,7 @@
 
     <div class="issuebar"><span><strong id="issue-number">ISSUE #1</strong> <time id="issue-date" datetime="2026-11-02">· Mon, Nov 2, 2026</time></span><span id="next-date">Next brief: Monday edition</span></div>
 
-    <article class="feature-story" aria-labelledby="feature-title">
+    <nav class="jump-links" aria-label="Jump to a newsletter section"><a href="#feature-story">Featured story · 3 min</a><a href="#supporting-stories">More signals</a><a href="#reader-question">Reader quiz</a></nav>\n\n    <article class="feature-story" id="feature-story" aria-labelledby="feature-title">
       <header class="story-head">
         <div class="story-meta"><span class="tag">This week’s feature · research deep dive</span><span class="read-time">3 minute read</span></div>
         <h2 id="feature-title">The hidden cost of “just add more data”</h2>
@@ -127,7 +130,7 @@
       </div>
     </article>
 
-    <section class="grid" aria-label="Supporting stories">
+    <section class="grid" id="supporting-stories" aria-label="Supporting stories">
       <h2 class="section-label">More signals from this week</h2>
       <article class="card small">
         <span class="number">01 / UNDERDOG</span><h2>Small data can be a smart baseline</h2><p>An ICML 2026 study finds that repeating a smaller dataset can speed learning in some settings. It is a conditional result, not a universal recipe.</p><p class="why"><b>Why this matters:</b> Compare a well-chosen small set against the cost of sourcing and processing more examples.</p><p class="source"><a href="https://proceedings.mlr.press/v306/liu26ad.html">Read the study ↗</a></p>
@@ -151,7 +154,7 @@
         <blockquote>“Repetition induces scale-dependent diminishing returns.”</blockquote>
         <cite>— Zhou et al., <a href="https://proceedings.mlr.press/v306/zhou26af.html">InfoLaw</a></cite>
       </article>
-      <article class="reader-question">
+      <article class="reader-question" id="reader-question">
         <span class="tag">Reader question</span>
         <p>What is the best takeaway from current evidence on scaling training datasets?</p>
         <fieldset class="mcq" aria-describedby="answer-feedback">
