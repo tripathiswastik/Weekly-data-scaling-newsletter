@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f4ee">
+  <meta name="description" content="A weekly research brief on when scaling training data helps deep learning—and when it does not.">
+  <title>Data, at Scale — Weekly Brief</title>
+  <style>
+    :root { color-scheme: light; --ink:#17251f; --muted:#60706a; --paper:#f6f4ee; --card:#fffefa; --line:#d9ded5; --green:#316b52; --lime:#d9f07d; --orange:#e5784c; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--paper); color:var(--ink); font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    a { color:var(--green); text-decoration-thickness:1px; text-underline-offset:3px; }
+    .shell { max-width:1100px; margin:auto; padding:28px 28px 70px; }
+    header { display:flex; align-items:center; justify-content:space-between; gap:18px; border-bottom:1px solid var(--line); padding:4px 0 18px; }
+    .brand { display:flex; align-items:center; gap:10px; font-size:13px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+    .mark { width:28px; height:28px; display:grid; place-items:center; background:var(--lime); border-radius:50%; font-size:16px; }
+    .schedule { color:var(--muted); font-size:12px; }
+    .hero { display:grid; grid-template-columns:1.2fr .8fr; gap:40px; padding:64px 0 45px; align-items:end; }
+    .eyebrow { margin:0 0 15px; color:var(--green); text-transform:uppercase; letter-spacing:.12em; font-weight:800; font-size:11px; }
+    h1 { max-width:700px; margin:0; font-size:clamp(42px,7vw,82px); line-height:.97; letter-spacing:-.065em; font-weight:750; }
+    .dek { max-width:390px; margin:0 0 5px; color:var(--muted); font-size:17px; line-height:1.55; }
+    .issuebar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:13px 16px; background:var(--ink); color:white; border-radius:9px; font-size:13px; }
+    .issuebar strong { color:var(--lime); }
+    .grid { display:grid; grid-template-columns:repeat(12,1fr); gap:14px; margin-top:14px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:24px; }
+    .lead { grid-column:span 7; min-height:300px; display:flex; flex-direction:column; justify-content:space-between; background:#e9efdf; border-color:#d5dfca; }
+    .side { grid-column:span 5; min-height:300px; display:flex; flex-direction:column; justify-content:space-between; }
+    .small { grid-column:span 4; min-height:225px; }
+    .wide { grid-column:span 8; min-height:225px; background:#f0e6dc; border-color:#e6d8cb; }
+    .tag { display:inline-flex; padding:6px 9px; border-radius:999px; background:rgba(49,107,82,.1); color:var(--green); font-size:10px; letter-spacing:.08em; font-weight:850; text-transform:uppercase; }
+    h2 { margin:15px 0 10px; font-size:clamp(23px,3vw,34px); line-height:1.1; letter-spacing:-.04em; }
+    .card p { color:#4f5e57; font-size:14px; line-height:1.6; margin:9px 0; }
+    .why { margin-top:18px!important; padding-top:13px; border-top:1px solid rgba(23,37,31,.16); color:var(--ink)!important; }
+    .why b { color:var(--green); }
+    .source { margin-top:15px!important; font-size:12px!important; }
+    .number { color:var(--orange); font-weight:800; font-size:12px; letter-spacing:.1em; }
+    .community { display:flex; align-items:center; justify-content:space-between; gap:18px; padding:21px 24px; margin-top:14px; border:1px solid var(--line); border-radius:10px; background:var(--card); }
+    .community p { margin:4px 0 0; color:var(--muted); font-size:13px; }
+    .community a { font-size:13px; font-weight:750; white-space:nowrap; }
+    footer { display:flex; justify-content:space-between; gap:12px; margin-top:23px; color:var(--muted); font-size:11px; }
+    @media(max-width:720px) { .shell{padding:19px 16px 48px}.hero{grid-template-columns:1fr;gap:20px;padding:46px 0 30px}.dek{max-width:520px}.lead,.side,.small,.wide{grid-column:span 12;min-height:unset}.lead{min-height:270px}.community{align-items:flex-start;flex-direction:column}.schedule{text-align:right} }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div class="brand"><span class="mark">↗</span> Data, at Scale</div>
+      <div class="schedule">A focused weekly research brief · Mondays, 11:00 AM IST</div>
+    </header>
+
+    <section class="hero">
+      <div>
+        <p class="eyebrow" id="edition-label">Weekly field notes</p>
+        <h1>Does more data always make a better model?</h1>
+      </div>
+      <p class="dek">One question, every week: when does scaling training data improve deep learning—and when do quality, repetition, compute, or infrastructure change the answer?</p>
+    </section>
+
+    <div class="issuebar"><span>THIS WEEK <strong id="issue-date">Loading edition…</strong></span><span id="next-date">Next brief: calculating…</span></div>
+
+    <section class="grid" aria-label="This week's research">
+      <article class="card lead">
+        <div><span class="tag">Research · hidden costs</span><h2>Filtering changes the compute equation</h2><p>An ICLR 2026 study finds that deduplication, heuristic filtering, and LLM-guided rewriting can shift compute-optimal token-to-parameter ratios by orders of magnitude. Curation is part of the training strategy: it changes which data and compute budget make sense.</p></div>
+        <div><p class="why"><b>Why this matters:</b> Measure the curation pipeline and training run together; “dataset size” alone can hide the real cost-performance tradeoff.</p><p class="source"><a href="https://proceedings.iclr.cc/paper_files/paper/2026/hash/6544c0b53cc1ea51d0c7086b536830a8-Abstract-Conference.html">Read the ICLR 2026 paper ↗</a></p></div>
+      </article>
+
+      <article class="card side">
+        <div><span class="tag">Myth buster · repetition</span><h2>“Higher quality” can still mean worse returns</h2><p>An ICML 2026 paper reports that upweighting high-quality data may hurt in data-limited, overtrained regimes when it causes excessive repetition.</p></div>
+        <div><p class="why"><b>Why this matters:</b> Track repeats and validation learning curves when fresh data is scarce.</p><p class="source"><a href="https://proceedings.mlr.press/v306/zhou26af.html">Read InfoLaw (ICML 2026) ↗</a></p></div>
+      </article>
+
+      <article class="card small">
+        <span class="number">01 / UNDERDOG</span><h2>Small data can be a smart baseline</h2><p>An ICML 2026 study finds that repeating a smaller dataset can speed learning in some settings. It is a conditional result, not a universal recipe.</p><p class="why"><b>Why this matters:</b> Compare a well-chosen small set against the cost of sourcing and processing more examples.</p><p class="source"><a href="https://proceedings.mlr.press/v306/liu26ad.html">Read the study ↗</a></p>
+      </article>
+
+      <article class="card small">
+        <span class="number">02 / PRODUCTION LESSON</span><h2>The data loader is part of the attack surface</h2><p>Hugging Face’s 2026 intrusion timeline describes abuse of dataset-processing paths, including unsafe handling of HDF5 external references and template expressions in data fields.</p><p class="why"><b>Why this matters:</b> Treat training data and configs as untrusted input, and isolate processing workers.</p><p class="source"><a href="https://huggingface.co/blog/agent-intrusion-technical-timeline">Read Hugging Face’s technical timeline ↗</a></p>
+      </article>
+
+      <article class="card wide">
+        <span class="tag">After review · practical direction</span><h2>Make the data mix measurable and revisable</h2><p>Recent research does not establish one universally best dataset size. It points instead to a task- and budget-dependent choice among data quality, coverage, repetition, and compute. As a practical inference, compare data mixtures on held-out evaluations and record the marginal gain per added unit of data and processing cost.</p><p class="why"><b>Why this matters:</b> A decision log lets the next training run build on measured results instead of repeating a scale-first assumption.</p>
+      </article>
+    </section>
+
+    <aside class="community"><div><strong>From the developer community</strong><p>Marin shares an open pipeline for curating a 25-trillion-token mixture, including deduplication, topic grouping, and quality bands.</p></div><a href="https://marin.community/blog/2026/09/11/marin-data-pipeline-overview/">Explore the community write-up ↗</a></aside>
+    <footer><span>Sources are linked inline. Findings are study-specific; practical recommendations are marked as inference.</span><span>Built for GitHub Pages</span></footer>
+  </main>
+  <script>
+    // Compute the weekly edition boundary in the newsletter's Asia/Kolkata timezone.
+    const zone = 'Asia/Kolkata';
+    const todayParts = new Intl.DateTimeFormat('en-CA', { timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
+    const part = key => Number(todayParts.find(item => item.type === key).value);
+    const todayUtc = new Date(Date.UTC(part('year'), part('month') - 1, part('day')));
+    const monday = new Date(todayUtc);
+    monday.setUTCDate(todayUtc.getUTCDate() - ((todayUtc.getUTCDay() + 6) % 7));
+    const nextMonday = new Date(monday);
+    nextMonday.setUTCDate(monday.getUTCDate() + 7);
+    const fmt = date => new Intl.DateTimeFormat(undefined, { timeZone: zone, weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' }).format(date);
+    document.getElementById('issue-date').textContent = fmt(monday);
+    document.getElementById('edition-label').textContent = `Weekly field notes · ${fmt(monday)}`;
+    document.getElementById('next-date').textContent = `Next brief: ${fmt(nextMonday)}`;
+  </script>
+</body>
+</html>
+
