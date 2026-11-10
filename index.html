@@ -113,71 +113,73 @@
 
     <article class="feature-story" id="feature-story" aria-labelledby="feature-title">
       <header class="story-head">
-        <div class="story-meta"><span class="tag">This week’s feature · research deep dive</span></div>
-        <h2 id="feature-title">The hidden cost of “just add more data”</h2>
-        <p class="story-dek">More examples can improve a model, but the same number of tokens can deliver very different value depending on what they contain, how often they repeat, and how much compute you can spend.</p>
+        <div class="story-meta"><span class="tag">This week’s feature · underdog direction</span></div>
+        <h2 id="feature-title">More examples—or more kinds of examples?</h2>
+        <p class="story-dek">A recent tool-use study suggests that, when the goal is handling unfamiliar situations, what training examples cover may matter more than how many you collect.</p>
       </header>
       <div class="story-content">
-        <p>“Add more data” is attractive advice because dataset size is easy to count. But size alone says little about how much useful, new information a training run receives. A recent large-scale study of language-model pretraining makes that gap concrete: data preparation can change the scaling curve itself.</p>
+        <p>“Add more training data” sounds like a safe bet. But if the new examples repeat the same patterns, a model may get better at familiar tasks without becoming much more reliable when the tools or combinations change. For general-purpose AI, that gap between familiar performance and out-of-distribution (OOD) performance is a real scaling problem.</p>
 
-        <h3>Filtering changes the training equation</h3>
-        <p>At ICLR 2026, Ardalani and colleagues studied 23 curated datasets and trained more than 2,000 models, ranging from 100 million to 8 billion parameters and 100 million to 200 billion tokens. They compared interventions including deduplication, heuristic filtering, and model-guided rewriting. Those choices shifted both the coefficients and exponents of fitted scaling laws. The compute-optimal balance between tokens and parameters varied by orders of magnitude across interventions. In the authors’ words, <a href="https://proceedings.iclr.cc/paper_files/paper/2026/hash/6544c0b53cc1ea51d0c7086b536830a8-Abstract-Conference.html">“data quality ranking is scale and resource-dependent.”</a></p>
+        <h3>The underdog result: variety beats raw volume in one controlled setting</h3>
+        <p>The ICML 2026 paper <a href="https://proceedings.mlr.press/v306/chen26gj.html"><em>DIVE: Scaling Diversity in Agentic Task Synthesis for Generalizable Tool Use</em></a> studies synthetic training tasks for tool-using language models. The authors trace brittle generalization to a lack of diversity across tools, tool combinations, and patterns of tool use. Their approach runs a range of real tools first, then derives training tasks from the resulting execution traces so examples remain grounded and verifiable.</p>
 
-        <p>That finding does not mean “filter everything as aggressively as possible.” Filtering changes the supply of examples available for training. If the remaining pool is small, a long run may cycle through the same material again and again.</p>
+        <p>The scale is substantial: 48,000 trajectories across 374 tools and five domains, covering 46,398 unique toolsets. In experiments with Qwen3-8B and nine OOD benchmarks, the DIVE training recipe improved the average score by 22 points and outperformed the strongest 8B baseline by 68 percent. In a fixed-budget comparison, the authors report that <a href="https://proceedings.mlr.press/v306/chen26gj.html">“diversity scaling consistently outperforms quantity scaling”</a>, even with four times less data.</p>
 
-        <h3>Cleaner data can still be overused</h3>
-        <p>An ICML 2026 study, InfoLaw, models how data quality, mixture weights, and repetition affect information gained during pretraining. It reports that in data-limited, overtrained settings, strongly upweighting high-quality data can increase repetition enough to degrade performance. The authors summarize one mechanism as <a href="https://proceedings.mlr.press/v306/zhou26af.html">“repetition induces scale-dependent diminishing returns.”</a> The lesson is a balance: low-quality data may waste compute, while repeatedly reusing a narrow high-quality pool can also lose value.</p>
+        <p>That does not mean example count is irrelevant. The result is about a specific model, synthetic tool-use training, and OOD generalization. The stronger lesson is that “more” has dimensions: more examples, more tool coverage, more combinations, and more varied interaction patterns. If you only scale the first, you can spend more compute on variations of the same experience.</p>
 
-        <h3>Choose the data mix for the run you can afford</h3>
-        <p>So the useful question is not simply “How large can the dataset get?” It is “At this compute budget, which mixture gives the best measured improvement on the task I care about?” That answer can change with model size, training duration, domain, and how much genuinely new data is available. The studies above concern language-model pretraining; treat their specific scaling results as evidence for that setting, not a universal law for every deep-learning task.</p>
+        <h3>Where the hidden cost moves</h3>
+        <p>Diversity is not free. Creating examples across many tools means keeping each task executable and checking that its expected result is valid. DIVE grounds tasks in traces to address that challenge; as a practical inference, teams adopting this direction should budget for tool maintenance, verification, and evaluation—not only generation. The cheap-looking dataset can be expensive if no one can tell whether its examples are valid or representative.</p>
+
+        <h3>A better comparison for your next run</h3>
+        <p>Hold the model, token budget, and training recipe steady. Then compare two additions: more examples from the current distribution, and a smaller set that expands the structural coverage of tools, domains, or task paths. Evaluate both on held-out combinations the training data never used. If the aim is robustness under change, the OOD result should decide which dataset earned its cost.</p>
 
         <section class="takeaway-box" aria-label="Bulleted breakdown">
           <h3>Bulleted breakdown</h3>
           <ul>
-            <li><strong>Count new information, not only tokens.</strong> Deduplication and source diversity help reveal whether added volume brings new coverage.</li>
-            <li><strong>Track repeats.</strong> A small clean dataset can become less useful when the training run reuses it too often.</li>
-            <li><strong>Compare under the same budget.</strong> Evaluate curated and larger mixtures with matched model, compute, and held-out tests.</li>
-            <li><strong>Measure the marginal gain.</strong> Record validation improvement alongside the cost of sourcing, filtering, storing, and processing the extra data.</li>
-            <li><strong>Make the choice task-specific.</strong> A dataset mix that helps one capability or domain may not be best for another.</li>
+            <li><strong>Name the target.</strong> “Better performance” could mean familiar accuracy or generalization to new tools and task combinations.</li>
+            <li><strong>Count the kinds of experience.</strong> Track domains, toolsets, and interaction patterns alongside total examples.</li>
+            <li><strong>Control the budget.</strong> Compare quantity and diversity with similar compute and training conditions.</li>
+            <li><strong>Validate every generated task.</strong> Measure the effort needed to keep examples executable and their outcomes checkable.</li>
+            <li><strong>Use held-out shifts.</strong> Test novel combinations, not just another random split from familiar tasks.</li>
           </ul>
         </section>
 
-        <p class="story-close"><strong>The takeaway:</strong> Scaling data can help, but “more” is not a strategy by itself. Treat data quality, repetition, and compute as parts of one experiment—and keep the mixture that earns its cost on the evaluation that matters.</p>
+        <p class="story-close"><strong>The takeaway:</strong> Data scaling is not one dial. This study’s result suggests that for tool-use generalization, adding different kinds of experience can beat adding more of the same—but that finding still needs validation on your model, task, and budget.</p>
       </div>
     </article>
 
     <section class="grid" id="supporting-stories" aria-label="Supporting stories">
       <h2 class="section-label">More signals from this week</h2>
       <article class="card small">
-        <span class="number">01 / UNDERDOG</span><h2>Small data can be a smart baseline</h2><p>An ICML 2026 study finds that repeating a smaller dataset can speed learning in some settings. It is a conditional result, not a universal recipe.</p><p class="why"><b>Why this matters:</b> Compare a well-chosen small set against the cost of sourcing and processing more examples.</p><p class="source"><a href="https://proceedings.mlr.press/v306/liu26ad.html">Read the study ↗</a></p>
+        <span class="number">01 / AFTER REVIEW</span><h2>More data still wins in some domains</h2><p>An ICML 2026 study of global weather models reports that a tenfold dataset increase reduced Aurora’s validation loss by up to 3.2 times. Under fixed compute, its analysis favored allocating more resources to training data over model size.</p><p class="why"><b>Why this matters:</b> The DIVE result is not a universal “less data is better” rule; the payoff depends on domain, objective, and data mix.</p><p class="source"><a href="https://proceedings.mlr.press/v306/yu26r.html">Read the weather-model study ↗</a></p>
       </article>
       <article class="card small">
-        <span class="number">02 / PRODUCTION LESSON</span><h2>The data loader is part of the attack surface</h2><p>Hugging Face’s 2026 intrusion timeline describes abuse of dataset-processing paths, including unsafe handling of HDF5 external references and template expressions in data fields.</p><p class="why"><b>Why this matters:</b> Treat training data and configs as untrusted input, and isolate processing workers.</p><p class="source"><a href="https://huggingface.co/blog/agent-intrusion-technical-timeline">Read Hugging Face’s technical timeline ↗</a></p>
+        <span class="number">02 / DEVELOPER COMMUNITY</span><h2>Try the recipe and inspect the artifacts</h2><p>The DIVE team has released its implementation, data, and model resources, giving practitioners a path to examine how execution traces become training tasks.</p><p class="why"><b>Why this matters:</b> Reproducible artifacts make it easier to see whether the claimed diversity is present in the examples you train on.</p><p class="source"><a href="https://github.com/sheep333c/DIVE">Explore the DIVE code and datasets ↗</a></p>
       </article>
       <article class="card wide">
-        <span class="tag">After review · practical direction</span><h2>Make the data mix measurable and revisable</h2><p>As a practical inference from this week’s evidence, compare data mixtures on held-out evaluations and record the marginal gain per added unit of data and processing cost.</p><p class="why"><b>Why this matters:</b> A decision log lets the next training run build on measured results instead of repeating a scale-first assumption.</p>
+        <span class="tag">Practical direction · inference</span><h2>Count coverage and verification cost</h2><p>For a controlled pilot, compare a larger familiar dataset with a more varied dataset at similar compute. Track coverage, valid-task rate, and held-out generalization so additional diversity is judged by useful outcomes rather than variety on paper alone.</p><p class="why"><b>Why this matters:</b> Broader data only pays off when the examples are valid and improve the behavior you need.</p>
       </article>
     </section>
 
     <section class="insights" aria-label="Quotes and reader question">
       <article class="quote-card">
-        <span class="tag">Quote 01 · ICLR 2026</span>
-        <blockquote>“Data quality ranking is scale and resource-dependent.”</blockquote>
-        <cite>— Ardalani et al., <a href="https://proceedings.iclr.cc/paper_files/paper/2026/hash/6544c0b53cc1ea51d0c7086b536830a8-Abstract-Conference.html">How Text Quality Interventions Reshape Neural Scaling Laws</a></cite>
+        <span class="tag">Quote 01 · ICML 2026</span>
+        <blockquote>“Diversity scaling consistently outperforms quantity scaling.”</blockquote>
+        <cite>— Chen et al., <a href="https://proceedings.mlr.press/v306/chen26gj.html">DIVE</a></cite>
       </article>
       <article class="quote-card">
         <span class="tag">Quote 02 · ICML 2026</span>
-        <blockquote>“Repetition induces scale-dependent diminishing returns.”</blockquote>
-        <cite>— Zhou et al., <a href="https://proceedings.mlr.press/v306/zhou26af.html">InfoLaw</a></cite>
+        <blockquote>“Increasing the training dataset by 10× reduces validation loss by up to 3.2×.”</blockquote>
+        <cite>— Yu et al., <a href="https://proceedings.mlr.press/v306/yu26r.html">Scaling Laws of Global Weather Models</a></cite>
       </article>
       <article class="reader-question" id="reader-question">
         <span class="tag">Reader question</span>
-        <p>What is the best takeaway from current evidence on scaling training datasets?</p>
+        <p>With a fixed training budget, which experiment best tests whether data diversity helps tool-use generalization?</p>
         <fieldset class="mcq" aria-describedby="answer-feedback">
           <legend class="sr-only">Choose one answer</legend>
-          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">A. Use one strict quality filter; the best-ranked data stays optimal as the run scales.</button>
-          <button class="mcq-option" type="button" data-correct="true" aria-pressed="false">B. Tune the mixture to the task and compute budget; track novelty, repetition, and held-out gains.</button>
-          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">C. Once examples are high quality, repeating them is a reliable substitute for fresh data.</button>
+          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">A. Add more examples from the same domains and tool combinations, then score on a random split.</button>
+          <button class="mcq-option" type="button" data-correct="true" aria-pressed="false">B. Compare varied, verified tasks with a larger familiar set at similar compute, then test unseen combinations.</button>
+          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">C. Keep only the highest-scoring familiar tasks; broad coverage matters less once quality is high.</button>
         </fieldset>
         <p class="answer-feedback" id="answer-feedback" role="status" aria-live="polite">Choose an answer to see feedback.</p>
       </article>
@@ -220,8 +222,8 @@
       option.setAttribute('aria-pressed', 'true');
       feedback.className = `answer-feedback ${isCorrect ? 'correct' : 'incorrect'}`;
       feedback.textContent = isCorrect
-        ? 'Correct. Match the mix to the task and budget, then measure new information and held-out gains.'
-        : 'Not quite. A quality ranking can change with scale, and repeated examples can lose marginal value. Recheck the mix against the run and task.';
+        ? 'Correct. Compare coverage at similar compute and evaluate on genuinely unseen tool combinations.'
+        : 'Not quite. A random split may reward familiar patterns; test unseen combinations and count verified diversity.';
     }));
   </script>
 </body>
