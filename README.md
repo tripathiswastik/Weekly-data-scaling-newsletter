@@ -1,12 +1,12 @@
-# 📈 Data, at Scale — Weekly Research Brief
+# 📈 Data, at Scale — Daily Research Brief
 
 [![Live Newsletter](https://img.shields.io/badge/Live%20Brief-GitHub%20Pages-brightgreen.svg)](https://tripathiswastik.github.io/Weekly-data-scaling-newsletter/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Cadence](https://img.shields.io/badge/Publishing-Mondays%2011%3A00%20IST-orange.svg)](https://tripathiswastik.github.io/Weekly-data-scaling-newsletter/)
+[![Cadence](https://img.shields.io/badge/Publishing-Daily%2011%3A00%20IST-orange.svg)](https://tripathiswastik.github.io/Weekly-data-scaling-newsletter/)
 [![Platform](https://img.shields.io/badge/Platform-HTML5%20%7C%20Vanilla%20JS-yellow.svg)](index.html)
 [![Author](https://img.shields.io/badge/Author-Swastik%20Tripathi-blueviolet.svg)](https://www.linkedin.com/in/swastik-tripathi-52333511a/)
 
-A focused weekly research brief evaluating one fundamental question in AI systems: **Does scaling training data always improve deep-learning model performance?**
+A focused daily research brief evaluating one fundamental question in AI systems: **Does scaling training data always improve deep-learning model performance?**
 
 > 🌐 **Read the Live Edition:** **[https://tripathiswastik.github.io/Weekly-data-scaling-newsletter/](https://tripathiswastik.github.io/Weekly-data-scaling-newsletter/)** (No installation or sign-up required)
 
@@ -14,7 +14,7 @@ A focused weekly research brief evaluating one fundamental question in AI system
 
 ## 🧭 Editorial & Research Scope
 
-Every week, *Data, at Scale* analyzes peer-reviewed papers, empirical benchmarks, and production post-mortems across four core pillars:
+Each day, *Data, at Scale* analyzes peer-reviewed papers, empirical benchmarks, and production post-mortems across four core pillars:
 
 1. **Quality vs. Quantity Tradeoffs**: Evaluating whether strict heuristic filtering, model-guided rewriting, or deduplication shift the exponents of neural scaling laws.
 2. **Repetition & Diminishing Returns**: Measuring when overtraining on a narrow high-quality data pool leads to degradation compared to fresh tokens.
@@ -29,7 +29,7 @@ Every week, *Data, at Scale* analyzes peer-reviewed papers, empirical benchmarks
 - **📋 Actionable Takeaway Box**: Bulleted engineering heuristics distinguishing empirical results from practical inferences.
 - **📡 "More Signals" Radar**: Compact summaries of emerging underdogs, production security alerts, and framework updates.
 - **🧩 Interactive Reader Quiz**: Zero-latency interactive MCQ checking reader comprehension with live feedback states.
-- **⏰ Autonomous Weekly Edition Counter**: Client-side timezone-aware scheduler (`Asia/Kolkata`) that dynamically derives the edition number, publication date, and next-brief countdown from the launch epoch without build steps or server dependencies.
+- **⏰ Autonomous Daily Edition Counter**: Client-side timezone-aware scheduler (`Asia/Kolkata`) that dynamically derives the edition number, publication date, and next-brief countdown from the launch date without build steps or server dependencies.
 
 ---
 
@@ -37,7 +37,7 @@ Every week, *Data, at Scale* analyzes peer-reviewed papers, empirical benchmarks
 
 ```mermaid
 flowchart TD
-    subgraph Research["Weekly Research & Synthesis"]
+    subgraph Research["Daily Research & Synthesis"]
         A["ArXiv / ICLR / ICML / NeurIPS Papers"]
         B["Production Incident Reports & Lab Disclosures"]
         C["Empirical Scaling Benchmarks"]
@@ -106,17 +106,9 @@ Then visit `http://localhost:8000` in your browser.
 
 ---
 
-## 🔄 Publishing a New Weekly Edition
+## 🔄 Publishing a New Daily Edition
 
-1. Open `index.html` and replace the featured story, citations, and bulleted breakdown.
-2. Update the "More signals from this week" cards and the reader quiz questions.
-3. Commit and push changes to `main`:
-   ```bash
-   git add index.html
-   git commit -m "feat(edition): publish Weekly Brief Issue #N"
-   git push origin main
-   ```
-4. The `.github/workflows/pages.yml` workflow will automatically validate and deploy the latest edition to GitHub Pages within seconds.
+The scheduled newsletter run prepares a fresh edition each day at 11:00 AM Asia/Kolkata, updates `index.html`, and commits it to `main`. The `.github/workflows/pages.yml` workflow then deploys the update to GitHub Pages. If the scheduled run cannot update or deploy the page, it reports the failure for follow-up.
 
 ---
 
