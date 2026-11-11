@@ -96,7 +96,7 @@
   <main class="shell">
     <header>
       <div class="brand"><span class="mark">↗</span> Data, at Scale</div>
-      <div class="schedule">A focused weekly research brief · Mondays, 11:00 AM IST</div>
+      <div class="schedule">A focused daily research brief · 11:00 AM IST</div>
     </header>
 
     <section class="hero">
@@ -113,73 +113,74 @@
 
     <article class="feature-story" id="feature-story" aria-labelledby="feature-title">
       <header class="story-head">
-        <div class="story-meta"><span class="tag">This week’s feature · underdog direction</span></div>
-        <h2 id="feature-title">More examples—or more kinds of examples?</h2>
-        <p class="story-dek">A recent tool-use study suggests that, when the goal is handling unfamiliar situations, what training examples cover may matter more than how many you collect.</p>
+        <div class="story-meta"><span class="tag">Today’s feature · hidden cost</span></div>
+        <h2 id="feature-title">When the training data is the expensive part</h2>
+        <p class="story-dek">For scientific models trained on simulations, each example has a generation cost. A new study treats fidelity—not just dataset size—as a scaling choice.</p>
       </header>
       <div class="story-content">
-        <p>“Add more training data” sounds like a safe bet. But if the new examples repeat the same patterns, a model may get better at familiar tasks without becoming much more reliable when the tools or combinations change. For general-purpose AI, that gap between familiar performance and out-of-distribution (OOD) performance is a real scaling problem.</p>
+        <p>“Add more data” often assumes that training examples are cheap to collect. That is true for some web corpora; it is a poor assumption for neural surrogates that learn from numerical simulations. Generating a single high-accuracy simulation can consume substantial compute before training even starts. In that setting, the hidden cost of scaling is not only storing more examples—it is producing them.</p>
 
-        <h3>The underdog result: variety beats raw volume in one controlled setting</h3>
-        <p>The ICML 2026 paper <a href="https://proceedings.mlr.press/v306/chen26gj.html"><em>DIVE: Scaling Diversity in Agentic Task Synthesis for Generalizable Tool Use</em></a> studies synthetic training tasks for tool-using language models. The authors trace brittle generalization to a lack of diversity across tools, tool combinations, and patterns of tool use. Their approach runs a range of real tools first, then derives training tasks from the resulting execution traces so examples remain grounded and verifiable.</p>
+        <h3>Make fidelity part of the data budget</h3>
+        <p>A NeurIPS 2026 paper, <a href="https://arxiv.org/abs/2610.17221"><em>Compute-optimal data scaling for neural surrogates via multi-fidelity training</em></a>, studies partial differential equation (PDE) surrogates. The authors treat data quantity and simulation fidelity as joint choices under a fixed data-generation compute budget. A coarse simulation is cheaper but less accurate; a fine simulation costs more. Instead of training only on the expensive end, their approach mixes several fidelity levels.</p>
 
-        <p>The scale is substantial: 48,000 trajectories across 374 tools and five domains, covering 46,398 unique toolsets. In experiments with Qwen3-8B and nine OOD benchmarks, the DIVE training recipe improved the average score by 22 points and outperformed the strongest 8B baseline by 68 percent. In a fixed-budget comparison, the authors report that <a href="https://proceedings.mlr.press/v306/chen26gj.html">“diversity scaling consistently outperforms quantity scaling”</a>, even with four times less data.</p>
+        <p>Across six PDE problems, four surrogate architectures, and more than 7,000 training runs, the authors report that an optimized fidelity mixture can match high-fidelity-only accuracy with up to 6.3 times less data-generation compute. Their experiments cover structured grids and unstructured meshes, as well as discretization and iterative-solver error. The paper describes the bottleneck directly: <a href="https://arxiv.org/abs/2610.17221">“the cost of data generation often outweighs the training cost.”</a></p>
 
-        <p>That does not mean example count is irrelevant. The result is about a specific model, synthetic tool-use training, and OOD generalization. The stronger lesson is that “more” has dimensions: more examples, more tool coverage, more combinations, and more varied interaction patterns. If you only scale the first, you can spend more compute on variations of the same experience.</p>
+        <p>This is not evidence that low-accuracy data is automatically useful. The low- and high-fidelity samples must relate in a way the model can learn from, and accuracy still needs to be checked against held-out high-fidelity simulations. The reported 6.3× is a best result across the paper’s settings, not a guaranteed saving for every simulator.</p>
 
-        <h3>Where the hidden cost moves</h3>
-        <p>Diversity is not free. Creating examples across many tools means keeping each task executable and checking that its expected result is valid. DIVE grounds tasks in traces to address that challenge; as a practical inference, teams adopting this direction should budget for tool maintenance, verification, and evaluation—not only generation. The cheap-looking dataset can be expensive if no one can tell whether its examples are valid or representative.</p>
+        <h3>What changes in the scaling question?</h3>
+        <p>For simulation-driven learning, “how many samples?” is incomplete. A better question is: given the full budget, how should we spend it across sample count and fidelity? Spending everything on a few costly, precise runs can leave useful coverage unexplored. Spending everything on cheap, noisy runs may teach the wrong relationship. A mixture can give the model broad signal cheaply, then preserve more expensive data for calibration and evaluation.</p>
 
-        <h3>A better comparison for your next run</h3>
-        <p>Hold the model, token budget, and training recipe steady. Then compare two additions: more examples from the current distribution, and a smaller set that expands the structural coverage of tools, domains, or task paths. Evaluate both on held-out combinations the training data never used. If the aim is robustness under change, the OOD result should decide which dataset earned its cost.</p>
+        <p>That shift matters for engineering teams because the data pipeline can dominate the training job. Tracking GPU-hours for training alone misses the cost of solver runs, mesh resolution, storage, and validation. As a practical inference, report error against total data-generation compute and keep a high-fidelity holdout set to ensure cheaper examples have not hidden a quality regression.</p>
 
         <section class="takeaway-box" aria-label="Bulleted breakdown">
           <h3>Bulleted breakdown</h3>
           <ul>
-            <li><strong>Name the target.</strong> “Better performance” could mean familiar accuracy or generalization to new tools and task combinations.</li>
-            <li><strong>Count the kinds of experience.</strong> Track domains, toolsets, and interaction patterns alongside total examples.</li>
-            <li><strong>Control the budget.</strong> Compare quantity and diversity with similar compute and training conditions.</li>
-            <li><strong>Validate every generated task.</strong> Measure the effort needed to keep examples executable and their outcomes checkable.</li>
-            <li><strong>Use held-out shifts.</strong> Test novel combinations, not just another random split from familiar tasks.</li>
+            <li><strong>Count generation cost.</strong> Include simulation compute, storage, and validation—not only model-training FLOPs.</li>
+            <li><strong>Record fidelity levels.</strong> Track resolution or solver accuracy for every data source.</li>
+            <li><strong>Compare mixtures at matched budgets.</strong> Test low-, high-, and mixed-fidelity training under equal data-generation compute.</li>
+            <li><strong>Keep a high-fidelity holdout.</strong> Measure whether cheaper data transfers to the accuracy target you actually need.</li>
+            <li><strong>Limit the claim to the evidence.</strong> These results are for studied PDE problems and surrogate architectures, not a general rule for all training datasets.</li>
           </ul>
         </section>
 
-        <p class="story-close"><strong>The takeaway:</strong> Data scaling is not one dial. This study’s result suggests that for tool-use generalization, adding different kinds of experience can beat adding more of the same—but that finding still needs validation on your model, task, and budget.</p>
+        <p class="story-close"><strong>The takeaway:</strong> Data volume is not the only scaling lever when examples are costly to generate. For simulation-based models, optimizing the fidelity mix may buy more useful learning per unit of compute than generating only the most precise data.</p>
       </div>
     </article>
 
     <section class="grid" id="supporting-stories" aria-label="Supporting stories">
-      <h2 class="section-label">More signals from this week</h2>
+      <h2 class="section-label">More signals from today’s research</h2>
       <article class="card small">
-        <span class="number">01 / AFTER REVIEW</span><h2>More data still wins in some domains</h2><p>An ICML 2026 study of global weather models reports that a tenfold dataset increase reduced Aurora’s validation loss by up to 3.2 times. Under fixed compute, its analysis favored allocating more resources to training data over model size.</p><p class="why"><b>Why this matters:</b> The DIVE result is not a universal “less data is better” rule; the payoff depends on domain, objective, and data mix.</p><p class="source"><a href="https://proceedings.mlr.press/v306/yu26r.html">Read the weather-model study ↗</a></p>
+        <span class="number">01 / UNDERDOG METHOD</span><h2>Spend on coverage before precision everywhere</h2><p>The paper’s method uses lower-fidelity simulations as an additional training signal, then checks performance against high-fidelity targets across PDE settings.</p><p class="why"><b>Why this matters:</b> Some teams may cover more of a parameter space without paying the maximum simulation cost for every sample.</p><p class="source"><a href="https://arxiv.org/abs/2610.17221">Read the paper ↗</a></p>
       </article>
       <article class="card small">
-        <span class="number">02 / DEVELOPER COMMUNITY</span><h2>Try the recipe and inspect the artifacts</h2><p>The DIVE team has released its implementation, data, and model resources, giving practitioners a path to examine how execution traces become training tasks.</p><p class="why"><b>Why this matters:</b> Reproducible artifacts make it easier to see whether the claimed diversity is present in the examples you train on.</p><p class="source"><a href="https://github.com/sheep333c/DIVE">Explore the DIVE code and datasets ↗</a></p>
+        <span class="number">02 / DEVELOPER COMMUNITY</span><h2>Reproduce the grid and mesh experiments</h2><p>The authors’ repository includes self-contained code for data generation, training, and evaluation, plus an airfoil dataset with 11 mesh levels.</p><p class="why"><b>Why this matters:</b> The artifacts let practitioners inspect fidelity levels and rerun the cost comparisons for their own simulator.</p><p class="source"><a href="https://github.com/psetinek/multi-fidelity-neural-surrogates">Explore the authors’ code and data ↗</a></p>
       </article>
       <article class="card wide">
-        <span class="tag">Practical direction · inference</span><h2>Count coverage and verification cost</h2><p>For a controlled pilot, compare a larger familiar dataset with a more varied dataset at similar compute. Track coverage, valid-task rate, and held-out generalization so additional diversity is judged by useful outcomes rather than variety on paper alone.</p><p class="why"><b>Why this matters:</b> Broader data only pays off when the examples are valid and improve the behavior you need.</p>
+        <span class="tag">After review · limits and lessons</span><h2>“Up to 6.3×” is a setting-specific ceiling</h2><p>The paper reports savings across six PDE problems, but the amount depends on the task, architecture, and fidelity mix. Treat its headline result as a reason to run a budget-matched pilot, not as a universal forecast.</p><p class="why"><b>Why this matters:</b> Verify the error-cost curve for your own data generator before moving budget away from high-fidelity runs.</p>
       </article>
     </section>
 
     <section class="insights" aria-label="Quotes and reader question">
       <article class="quote-card">
-        <span class="tag">Quote 01 · ICML 2026</span>
-        <blockquote>“Diversity scaling consistently outperforms quantity scaling.”</blockquote>
-        <cite>— Chen et al., <a href="https://proceedings.mlr.press/v306/chen26gj.html">DIVE</a></cite>
+        <span class="tag">Quote 01 · NeurIPS 2026 paper</span>
+        <blockquote>“The cost of data generation often outweighs the training cost.”</blockquote>
+        <cite>— Setinek et al., <a href="https://arxiv.org/abs/2610.17221">Compute-optimal data scaling for neural surrogates</a></cite>
+        <p class="why"><b>Why this matters:</b> Training compute alone can miss the largest cost in a simulation pipeline.</p>
       </article>
       <article class="quote-card">
-        <span class="tag">Quote 02 · ICML 2026</span>
-        <blockquote>“Increasing the training dataset by 10× reduces validation loss by up to 3.2×.”</blockquote>
-        <cite>— Yu et al., <a href="https://proceedings.mlr.press/v306/yu26r.html">Scaling Laws of Global Weather Models</a></cite>
+        <span class="tag">Quote 02 · NeurIPS 2026 paper</span>
+        <blockquote>“Up to 6.3× less data generation compute.”</blockquote>
+        <cite>— Setinek et al., <a href="https://arxiv.org/abs/2610.17221">multi-fidelity training results</a></cite>
+        <p class="why"><b>Why this matters:</b> The potential saving is large enough to justify a controlled comparison, but is not guaranteed for every problem.</p>
       </article>
       <article class="reader-question" id="reader-question">
         <span class="tag">Reader question</span>
-        <p>With a fixed training budget, which experiment best tests whether data diversity helps tool-use generalization?</p>
+        <p>Which test best shows whether cheaper simulation data preserves a neural surrogate’s target accuracy?</p>
         <fieldset class="mcq" aria-describedby="answer-feedback">
           <legend class="sr-only">Choose one answer</legend>
-          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">A. Add more examples from the same domains and tool combinations, then score on a random split.</button>
-          <button class="mcq-option" type="button" data-correct="true" aria-pressed="false">B. Compare varied, verified tasks with a larger familiar set at similar compute, then test unseen combinations.</button>
-          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">C. Keep only the highest-scoring familiar tasks; broad coverage matters less once quality is high.</button>
+          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">A. Train on the cheapest simulator only and compare training loss.</button>
+          <button class="mcq-option" type="button" data-correct="true" aria-pressed="false">B. Compare fidelity mixtures at matched generation budgets on held-out high-fidelity cases.</button>
+          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">C. Use the largest possible dataset and report its accuracy without counting simulation cost.</button>
         </fieldset>
         <p class="answer-feedback" id="answer-feedback" role="status" aria-live="polite">Choose an answer to see feedback.</p>
       </article>
@@ -192,25 +193,23 @@
     </footer>
   </main>
   <script>
-    // Compute the weekly edition boundary in the newsletter's Asia/Kolkata timezone.
+    // Compute the daily edition boundary in the newsletter's Asia/Kolkata timezone.
     const zone = 'Asia/Kolkata';
     const todayParts = new Intl.DateTimeFormat('en-CA', { timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
     const part = key => Number(todayParts.find(item => item.type === key).value);
     const todayUtc = new Date(Date.UTC(part('year'), part('month') - 1, part('day')));
-    const monday = new Date(todayUtc);
-    monday.setUTCDate(todayUtc.getUTCDate() - ((todayUtc.getUTCDay() + 6) % 7));
-    const nextMonday = new Date(monday);
-    nextMonday.setUTCDate(monday.getUTCDate() + 7);
+    const nextEdition = new Date(todayUtc);
+    nextEdition.setUTCDate(todayUtc.getUTCDate() + 1);
     const fmt = date => new Intl.DateTimeFormat(undefined, { timeZone: zone, weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' }).format(date);
     const issueStart = new Date(Date.UTC(2026, 10, 2));
-    const issueNumber = Math.max(1, Math.floor((monday.getTime() - issueStart.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1);
+    const issueNumber = Math.max(1, Math.floor((todayUtc.getTime() - issueStart.getTime()) / (24 * 60 * 60 * 1000)) + 1);
     document.getElementById('issue-number').textContent = `ISSUE #${issueNumber}`;
     const issueDate = document.getElementById('issue-date');
-    issueDate.textContent = `· ${fmt(monday)}`;
-    issueDate.dateTime = monday.toISOString().slice(0, 10);
-    document.getElementById('edition-label').textContent = `Weekly field notes · ${fmt(monday)}`;
-    document.getElementById('next-date').textContent = `Next brief: ${fmt(nextMonday)}`;
-    const options = [...document.querySelectorAll('.mcq-option')];
+    issueDate.textContent = `· ${fmt(todayUtc)}`;
+    issueDate.dateTime = todayUtc.toISOString().slice(0, 10);
+    document.getElementById('edition-label').textContent = `Daily field notes · ${fmt(todayUtc)}`;
+    document.getElementById('next-date').textContent = `Next brief: ${fmt(nextEdition)}`;
+        const options = [...document.querySelectorAll('.mcq-option')];
     const feedback = document.getElementById('answer-feedback');
     options.forEach(option => option.addEventListener('click', () => {
       options.forEach(item => {
@@ -222,8 +221,8 @@
       option.setAttribute('aria-pressed', 'true');
       feedback.className = `answer-feedback ${isCorrect ? 'correct' : 'incorrect'}`;
       feedback.textContent = isCorrect
-        ? 'Correct. Compare coverage at similar compute and evaluate on genuinely unseen tool combinations.'
-        : 'Not quite. A random split may reward familiar patterns; test unseen combinations and count verified diversity.';
+        ? 'Correct. Match generation budgets and evaluate error on held-out high-fidelity simulations.'
+        : 'Not quite. Training loss or a low-fidelity-only score cannot show whether target accuracy was preserved.';
     }));
   </script>
 </body>
