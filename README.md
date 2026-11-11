@@ -125,5 +125,5 @@ This project is open-source and licensed under the [MIT License](LICENSE).
 ---
 
 ## 🏷️ Repository Metadata & Topic Tags
-- **About Description**: Weekly research brief analyzing neural scaling laws, training data quality vs. quantity tradeoffs, and compute-optimal pretraining mixtures.
+- **About Description**: Daily research brief analyzing neural scaling laws, training data quality vs. quantity tradeoffs, and compute-optimal pretraining mixtures.
 - **Core Topics**: `deep-learning` `data-scaling` `scaling-laws` `pretraining` `llm-data` `ai-research` `newsletter` `github-pages` `machine-learning`
