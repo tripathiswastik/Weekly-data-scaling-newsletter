@@ -107,86 +107,59 @@
       <p class="dek">One question, every week: when does scaling training data improve deep learning—and when do quality, repetition, compute, or infrastructure change the answer?</p>
     </section>
 
-    <div class="issuebar"><span><strong id="issue-number">ISSUE #10</strong> <time id="issue-date" datetime="2026-11-11">· Wed, Nov 11, 2026</time></span><span id="next-date">Next brief: Thu, November 12, 2026</span></div>
+    <div class="issuebar"><span><strong id="issue-number">ISSUE #11</strong> <time id="issue-date" datetime="2026-11-12">· Thu, Nov 12, 2026</time></span><span id="next-date">Next brief: Fri, November 13, 2026</span></div>
 
     <nav class="jump-links" aria-label="Jump to a newsletter section"><a href="#feature-story">Featured story</a><a href="#supporting-stories">More signals</a><a href="#reader-question">Reader quiz</a></nav>
 
     <article class="feature-story" id="feature-story" aria-labelledby="feature-title">
       <header class="story-head">
-        <div class="story-meta"><span class="tag">Today’s feature · hidden cost</span></div>
-        <h2 id="feature-title">When the training data is the expensive part</h2>
-        <p class="story-dek">For scientific models trained on simulations, each example has a generation cost. A new study treats fidelity—not just dataset size—as a scaling choice.</p>
+        <div class="story-meta"><span class="tag">Today’s feature · wrong direction to better direction</span></div>
+        <h2 id="feature-title">More rows can make the wrong future look predictable</h2>
+        <p class="story-dek">A large real-world tabular study finds that adding training data often helps—but under natural distribution shifts, in-distribution and out-of-distribution results can part company at scale.</p>
       </header>
       <div class="story-content">
-        <p>“Add more data” often assumes that training examples are cheap to collect. That is true for some web corpora; it is a poor assumption for neural surrogates that learn from numerical simulations. Generating a single high-accuracy simulation can consume substantial compute before training even starts. In that setting, the hidden cost of scaling is not only storing more examples—it is producing them.</p>
-
-        <h3>Make fidelity part of the data budget</h3>
-        <p>A NeurIPS 2026 paper, <a href="https://arxiv.org/abs/2610.17221"><em>Compute-optimal data scaling for neural surrogates via multi-fidelity training</em></a>, studies partial differential equation (PDE) surrogates. The authors treat data quantity and simulation fidelity as joint choices under a fixed data-generation compute budget. A coarse simulation is cheaper but less accurate; a fine simulation costs more. Instead of training only on the expensive end, their approach mixes several fidelity levels.</p>
-
-        <p>Across six PDE problems, four surrogate architectures, and more than 7,000 training runs, the authors report that an optimized fidelity mixture can match high-fidelity-only accuracy with up to 6.3 times less data-generation compute. Their experiments cover structured grids and unstructured meshes, as well as discretization and iterative-solver error. The paper describes the bottleneck directly: <a href="https://arxiv.org/abs/2610.17221">“the cost of data generation often outweighs the training cost.”</a></p>
-
-        <p>This is not evidence that low-accuracy data is automatically useful. The low- and high-fidelity samples must relate in a way the model can learn from, and accuracy still needs to be checked against held-out high-fidelity simulations. The reported 6.3× is a best result across the paper’s settings, not a guaranteed saving for every simulator.</p>
-
-        <h3>What changes in the scaling question?</h3>
-        <p>For simulation-driven learning, “how many samples?” is incomplete. A better question is: given the full budget, how should we spend it across sample count and fidelity? Spending everything on a few costly, precise runs can leave useful coverage unexplored. Spending everything on cheap, noisy runs may teach the wrong relationship. A mixture can give the model broad signal cheaply, then preserve more expensive data for calibration and evaluation.</p>
-
-        <p>That shift matters for engineering teams because the data pipeline can dominate the training job. Tracking GPU-hours for training alone misses the cost of solver runs, mesh resolution, storage, and validation. As a practical inference, report error against total data-generation compute and keep a high-fidelity holdout set to ensure cheaper examples have not hidden a quality regression.</p>
-
+        <p>“More data improves performance” sounds like a universal rule because many experiments draw train and test examples from the same distribution. In production, that assumption often fails: customer behavior changes, sensors drift, fraud patterns adapt, or the population shifts. A larger training set can describe the past in greater detail without becoming a better guide to the next population.</p>
+        <h3>Eight datasets, up to roughly ten million examples</h3>
+        <p>In <a href="https://arxiv.org/abs/2610.26794"><em>On Data Scaling in Tabular ML: More Data, Better Generalization?</em></a>, Ivan Rubachev, Nikita Lazarev, and Artem Babenko examine eight real-world tabular datasets, retaining natural shifts and using random splits as a control. They scale training sets to around ten million examples and study gradient-boosted trees, multilayer perceptrons (MLPs), and tabular foundation models.</p>
+        <p>The broad result is not “more data hurts.” For many tasks and models, more examples improve test performance, sometimes through the largest sizes studied. But the paper’s more important finding concerns what “test performance” means. At smaller training sizes, in-distribution (ID) and out-of-distribution (OOD) results mostly move together. At larger sizes, they can diverge: extra data may continue improving ID performance while OOD performance stalls or worsens, especially when MLPs are selected using ID validation data.</p>
+        <p>The authors connect this divergence to model selection. As the training set grows, choices such as architecture width, hyperparameters, and early stopping matter more for OOD generalization. If validation data resembles the training distribution but not the production target, selecting the model that wins on that validation set can reward the wrong behavior. In their experiments, validation more representative of evaluation conditions helps MLP-based models maintain or improve OOD performance as training data scales.</p>
+        <h3>A validation split is part of the scaling recipe</h3>
+        <p>This is evidence from tabular tasks with natural shifts, not proof that every dataset behaves this way. The paper also finds that newer tabular foundation models benefit more consistently from larger in-context examples, although that does not eliminate every OOD decline in the tested settings. Model family and how validation is used both change the outcome.</p>
+        <p>The practical correction is to stop treating a random split as a universal proxy for tomorrow. For time-dependent data, validate on later periods. For geographic or customer shifts, hold out regions or cohorts that resemble deployment. Track ID and OOD metrics separately as training data grows, and compare models at matched evaluation conditions.</p>
+        <p><strong>Inference:</strong> If adding examples improves the familiar benchmark but not the deployment-relevant holdout, the next investment may be better target-aligned evaluation, data coverage, or model selection—not simply another expansion of the training corpus. The study does not prescribe one universal validation design; the right split depends on the shift the system must survive.</p>
         <section class="takeaway-box" aria-label="Bulleted breakdown">
           <h3>Bulleted breakdown</h3>
           <ul>
-            <li><strong>Count generation cost.</strong> Include simulation compute, storage, and validation—not only model-training FLOPs.</li>
-            <li><strong>Record fidelity levels.</strong> Track resolution or solver accuracy for every data source.</li>
-            <li><strong>Compare mixtures at matched budgets.</strong> Test low-, high-, and mixed-fidelity training under equal data-generation compute.</li>
-            <li><strong>Keep a high-fidelity holdout.</strong> Measure whether cheaper data transfers to the accuracy target you actually need.</li>
-            <li><strong>Limit the claim to the evidence.</strong> These results are for studied PDE problems and surrogate architectures, not a general rule for all training datasets.</li>
+            <li><strong>Keep the control.</strong> Compare random-split results with realistic time, geography, or cohort shifts.</li>
+            <li><strong>Scale the evaluation too.</strong> Monitor ID and OOD curves at each training-set size instead of reporting one blended score.</li>
+            <li><strong>Match validation to deployment.</strong> Test whether target-representative validation changes which model wins.</li>
+            <li><strong>Separate evidence from inference.</strong> Divergence was observed in the studied tasks; applying this diagnostic elsewhere is a practical recommendation, not a universal result.</li>
           </ul>
         </section>
-
-        <p class="story-close"><strong>The takeaway:</strong> Data volume is not the only scaling lever when examples are costly to generate. For simulation-based models, optimizing the fidelity mix may buy more useful learning per unit of compute than generating only the most precise data.</p>
+        <p class="story-close"><strong>The takeaway:</strong> More examples often help, but “better” depends on where performance is measured. Under distribution shift, scaling the training set without aligning model selection and validation to deployment can improve the score you see while weakening the generalization you need.</p>
       </div>
     </article>
 
     <section class="grid" id="supporting-stories" aria-label="Supporting stories">
       <h2 class="section-label">More signals from today’s research</h2>
-      <article class="card small">
-        <span class="number">01 / UNDERDOG METHOD</span><h2>Spend on coverage before precision everywhere</h2><p>The paper’s method uses lower-fidelity simulations as an additional training signal, then checks performance against high-fidelity targets across PDE settings.</p><p class="why"><b>Why this matters:</b> Some teams may cover more of a parameter space without paying the maximum simulation cost for every sample.</p><p class="source"><a href="https://arxiv.org/abs/2610.17221">Read the paper ↗</a></p>
-      </article>
-      <article class="card small">
-        <span class="number">02 / DEVELOPER COMMUNITY</span><h2>Reproduce the grid and mesh experiments</h2><p>The authors’ repository includes self-contained code for data generation, training, and evaluation, plus an airfoil dataset with 11 mesh levels.</p><p class="why"><b>Why this matters:</b> The artifacts let practitioners inspect fidelity levels and rerun the cost comparisons for their own simulator.</p><p class="source"><a href="https://github.com/psetinek/multi-fidelity-neural-surrogates">Explore the authors’ code and data ↗</a></p>
-      </article>
-      <article class="card wide">
-        <span class="tag">After review · limits and lessons</span><h2>“Up to 6.3×” is a setting-specific ceiling</h2><p>The paper reports savings across six PDE problems, but the amount depends on the task, architecture, and fidelity mix. Treat its headline result as a reason to run a budget-matched pilot, not as a universal forecast.</p><p class="why"><b>Why this matters:</b> Verify the error-cost curve for your own data generator before moving budget away from high-fidelity runs.</p>
-      </article>
+      <article class="card small"><span class="number">01 / HIDDEN ASSUMPTION</span><h2>Random splits can hide the deployment gap</h2><p>The study retained natural shifts and used random splits as a control. Its scaling trends show why a familiar split alone may not reveal how models behave on a changed population.</p><p class="why"><b>Why this matters:</b> A benchmark can keep improving while the real-world target drifts away from it.</p><p class="source"><a href="https://arxiv.org/abs/2610.26794">Read the primary study ↗</a></p></article>
+      <article class="card small"><span class="number">02 / DEVELOPER COMMUNITY</span><h2>Inspect the experiments and reproduce the splits</h2><p>The authors publish code and experiment materials for their large-scale tabular study, making it possible to inspect dataset construction and model-selection choices.</p><p class="why"><b>Why this matters:</b> The split and tuning protocol can matter as much as the number of training rows.</p><p class="source"><a href="https://github.com/yandex-research/tabular-dl-more-data">Explore the authors’ repository ↗</a></p></article>
+      <article class="card wide"><span class="tag">After review · evaluation lesson</span><h2>Plot two curves, not one</h2><p>As training data grows, report performance on both an ID test set and a deployment-relevant OOD set. The study finds these can diverge at larger scales; target-representative validation helped MLP selection in the examined tasks.</p><p class="why"><b>Why this matters:</b> Separate curves reveal whether new data improves the target you care about or mainly the distribution you already know.</p></article>
     </section>
 
     <section class="insights" aria-label="Quotes and reader question">
-      <article class="quote-card">
-        <span class="tag">Quote 01 · NeurIPS 2026 paper</span>
-        <blockquote>“The cost of data generation often outweighs the training cost.”</blockquote>
-        <cite>— Setinek et al., <a href="https://arxiv.org/abs/2610.17221">Compute-optimal data scaling for neural surrogates</a></cite>
-        <p class="why"><b>Why this matters:</b> Training compute alone can miss the largest cost in a simulation pipeline.</p>
-      </article>
-      <article class="quote-card">
-        <span class="tag">Quote 02 · NeurIPS 2026 paper</span>
-        <blockquote>“Up to 6.3× less data generation compute.”</blockquote>
-        <cite>— Setinek et al., <a href="https://arxiv.org/abs/2610.17221">multi-fidelity training results</a></cite>
-        <p class="why"><b>Why this matters:</b> The potential saving is large enough to justify a controlled comparison, but is not guaranteed for every problem.</p>
-      </article>
+      <article class="quote-card"><span class="tag">Quote 01 · arXiv study</span><blockquote>“performance mostly improve together at smaller scales”</blockquote><cite>— Rubachev, Lazarev &amp; Babenko, <a href="https://arxiv.org/abs/2610.26794">On Data Scaling in Tabular ML</a></cite><p class="why"><b>Why this matters:</b> Early gains can make scaling appear uniformly safe even when later behavior differs.</p></article>
+      <article class="quote-card"><span class="tag">Quote 02 · arXiv study</span><blockquote>“can diverge at larger scales”</blockquote><cite>— Rubachev, Lazarev &amp; Babenko, <a href="https://arxiv.org/abs/2610.26794">On Data Scaling in Tabular ML</a></cite><p class="why"><b>Why this matters:</b> One headline metric may conceal opposite trends across familiar and shifted populations.</p></article>
       <article class="reader-question" id="reader-question">
-        <span class="tag">Reader question</span>
-        <p>Which test best shows whether cheaper simulation data preserves a neural surrogate’s target accuracy?</p>
-        <fieldset class="mcq" aria-describedby="answer-feedback">
-          <legend class="sr-only">Choose one answer</legend>
-          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">A. Train on the cheapest simulator only and compare training loss.</button>
-          <button class="mcq-option" type="button" data-correct="true" aria-pressed="false">B. Compare fidelity mixtures at matched generation budgets on held-out high-fidelity cases.</button>
-          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">C. Use the largest possible dataset and report its accuracy without counting simulation cost.</button>
-        </fieldset>
-        <p class="answer-feedback" id="answer-feedback" role="status" aria-live="polite">Choose an answer to see feedback.</p>
+        <span class="tag">Reader question</span><p>A tabular model’s score rises as you add data, but the production population shifts over time. What is the strongest next check?</p>
+        <fieldset class="mcq" aria-describedby="answer-feedback"><legend class="sr-only">Choose one answer</legend>
+          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">A. Keep the random split; a larger sample makes its score representative by itself.</button>
+          <button class="mcq-option" type="button" data-correct="true" aria-pressed="false">B. Track separate ID and deployment-like OOD performance, and select using target-representative validation.</button>
+          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">C. Add shifted production examples to training and validation, then report the combined score.</button>
+        </fieldset><p class="answer-feedback" id="answer-feedback" role="status" aria-live="polite">Choose an answer to see feedback.</p>
       </article>
     </section>
-
-    <aside class="community"><div><strong>From the developer community</strong><p>Marin shares an open pipeline for curating a 25-trillion-token mixture, including deduplication, topic grouping, and quality bands.</p></div><a href="https://marin.community/blog/2026/09/11/marin-data-pipeline-overview/">Explore the community write-up ↗</a></aside>
+    <aside class="community"><div><strong>From the developer community</strong><p>Inspect reproducibility materials, data processing, and experiments for scaling tabular models under natural shifts.</p></div><a href="https://github.com/yandex-research/tabular-dl-more-data">Open the research repository ↗</a></aside>
     <footer>
       <span>Curated by <a href="https://github.com/tripathiswastik" target="_blank" rel="noopener">Swastik Tripathi</a> · <a href="https://www.linkedin.com/in/swastik-tripathi-52333511a/" target="_blank" rel="noopener">LinkedIn</a> · Sources linked inline</span>
       <span><a href="https://github.com/tripathiswastik/Weekly-data-scaling-newsletter" target="_blank" rel="noopener">GitHub</a> · Published via GitHub Pages</span>
@@ -221,8 +194,8 @@
       option.setAttribute('aria-pressed', 'true');
       feedback.className = `answer-feedback ${isCorrect ? 'correct' : 'incorrect'}`;
       feedback.textContent = isCorrect
-        ? 'Correct. Match generation budgets and evaluate error on held-out high-fidelity simulations.'
-        : 'Not quite. Training loss or a low-fidelity-only score cannot show whether target accuracy was preserved.';
+        ? 'Correct. Keep ID and deployment-like OOD evaluation separate, and align model selection with the target distribution.'
+        : 'Not quite. A random split or combined score can hide a deployment shift; preserve a target-representative holdout.';
     }));
   </script>
 </body>
