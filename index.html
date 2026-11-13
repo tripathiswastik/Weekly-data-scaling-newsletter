@@ -107,59 +107,60 @@
       <p class="dek">One question, every week: when does scaling training data improve deep learning—and when do quality, repetition, compute, or infrastructure change the answer?</p>
     </section>
 
-    <div class="issuebar"><span><strong id="issue-number">ISSUE #11</strong> <time id="issue-date" datetime="2026-11-12">· Thu, Nov 12, 2026</time></span><span id="next-date">Next brief: Fri, November 13, 2026</span></div>
+    <div class="issuebar"><span><strong id="issue-number">ISSUE #12</strong> <time id="issue-date" datetime="2026-11-13">· Fri, Nov 13, 2026</time></span><span id="next-date">Next brief: Sat, November 14, 2026</span></div>
 
     <nav class="jump-links" aria-label="Jump to a newsletter section"><a href="#feature-story">Featured story</a><a href="#supporting-stories">More signals</a><a href="#reader-question">Reader quiz</a></nav>
 
     <article class="feature-story" id="feature-story" aria-labelledby="feature-title">
       <header class="story-head">
-        <div class="story-meta"><span class="tag">Today’s feature · wrong direction to better direction</span></div>
-        <h2 id="feature-title">More rows can make the wrong future look predictable</h2>
-        <p class="story-dek">A large real-world tabular study finds that adding training data often helps—but under natural distribution shifts, in-distribution and out-of-distribution results can part company at scale.</p>
+        <div class="story-meta"><span class="tag">Today’s feature · underdog perspective</span></div>
+        <h2 id="feature-title">When the domain is small, repetition can be a scaling strategy</h2>
+        <p class="story-dek">A data-constrained study finds that scarce specialist or low-resource-language corpora can still contribute at scale—if they are mixed with general data and repeated deliberately.</p>
       </header>
       <div class="story-content">
-        <p>“More data improves performance” sounds like a universal rule because many experiments draw train and test examples from the same distribution. In production, that assumption often fails: customer behavior changes, sensors drift, fraud patterns adapt, or the population shifts. A larger training set can describe the past in greater detail without becoming a better guide to the next population.</p>
-        <h3>Eight datasets, up to roughly ten million examples</h3>
-        <p>In <a href="https://arxiv.org/abs/2610.26794"><em>On Data Scaling in Tabular ML: More Data, Better Generalization?</em></a>, Ivan Rubachev, Nikita Lazarev, and Artem Babenko examine eight real-world tabular datasets, retaining natural shifts and using random splits as a control. They scale training sets to around ten million examples and study gradient-boosted trees, multilayer perceptrons (MLPs), and tabular foundation models.</p>
-        <p>The broad result is not “more data hurts.” For many tasks and models, more examples improve test performance, sometimes through the largest sizes studied. But the paper’s more important finding concerns what “test performance” means. At smaller training sizes, in-distribution (ID) and out-of-distribution (OOD) results mostly move together. At larger sizes, they can diverge: extra data may continue improving ID performance while OOD performance stalls or worsens, especially when MLPs are selected using ID validation data.</p>
-        <p>The authors connect this divergence to model selection. As the training set grows, choices such as architecture width, hyperparameters, and early stopping matter more for OOD generalization. If validation data resembles the training distribution but not the production target, selecting the model that wins on that validation set can reward the wrong behavior. In their experiments, validation more representative of evaluation conditions helps MLP-based models maintain or improve OOD performance as training data scales.</p>
-        <h3>A validation split is part of the scaling recipe</h3>
-        <p>This is evidence from tabular tasks with natural shifts, not proof that every dataset behaves this way. The paper also finds that newer tabular foundation models benefit more consistently from larger in-context examples, although that does not eliminate every OOD decline in the tested settings. Model family and how validation is used both change the outcome.</p>
-        <p>The practical correction is to stop treating a random split as a universal proxy for tomorrow. For time-dependent data, validate on later periods. For geographic or customer shifts, hold out regions or cohorts that resemble deployment. Track ID and OOD metrics separately as training data grows, and compare models at matched evaluation conditions.</p>
-        <p><strong>Inference:</strong> If adding examples improves the familiar benchmark but not the deployment-relevant holdout, the next investment may be better target-aligned evaluation, data coverage, or model selection—not simply another expansion of the training corpus. The study does not prescribe one universal validation design; the right split depends on the shift the system must survive.</p>
+        <p>Many training plans quietly assume that a model can always be fed more distinct examples. That assumption breaks for low-resource languages, specialized fields, and other domains where the useful corpus is finite. Teams then face an apparent choice: underrepresent the target domain with generic data, or repeat a small target set until the model overfits.</p>
+        <h3>More than 2,000 training runs test the trade-off</h3>
+        <p>In <a href="https://arxiv.org/abs/2605.12715"><em>Scaling Laws for Mixture Pretraining Under Data Constraints</em></a>, Anastasiia Sedova, Skyler Seto, Natalie Schluter, and Pierre Ablin study mixtures of scarce target data and abundant generic data. Their experiments span more than 2,000 language-model training runs, multiple model and target-dataset sizes, and multilingual, domain-specific, and quality-filtered data.</p>
+        <p>The central finding challenges the simple rule “never repeat data.” In the studied mixtures, repetition is a major driver of target-domain performance, and mixed training tolerates more reuse than training on a single source. The authors report that scarce target corpora can be reused 15–20 times, but the best repetition count changes with corpus size, compute budget, and model scale. It is not a universal setting to copy into every recipe.</p>
+        <p>Why can repeating examples help? Generic data supplies breadth, while repeated target examples increase exposure to the specific language or domain the model must handle. The paper models both effects with a repetition-aware mixture scaling law: repeated target tokens provide diminishing value, while the generic component has a regularizing role. The goal is to choose a mixture based on the target corpus and budget instead of treating every repeated pass as either waste or free extra data.</p>
+        <h3>From “find more data” to “budget the exposure”</h3>
+        <p>The practical change is to measure effective target exposure, not just the raw size of the corpus. Record how often target examples recur, what proportion of training tokens comes from the generic pool, and how the model performs on held-out target examples. Sweep mixture ratios and repetition under a fixed compute budget; include a no-repeat or low-repeat baseline so the team can see when added passes stop helping.</p>
+        <p><strong>Evidence boundary:</strong> The authors tested particular training runs, data mixtures, and model scales. The 15–20 reuse range is their reported result across the studied settings, not a general promise that repetition will improve every model, or that repeated examples equal new independent information.</p>
+        <p><strong>Inference:</strong> For teams blocked on acquiring more specialist data, it may be more useful to first optimize how existing examples are mixed and revisited. That is a lower-cost experiment than launching a new collection effort, but only target-specific held-out evaluation can show whether it worked.</p>
         <section class="takeaway-box" aria-label="Bulleted breakdown">
           <h3>Bulleted breakdown</h3>
           <ul>
-            <li><strong>Keep the control.</strong> Compare random-split results with realistic time, geography, or cohort shifts.</li>
-            <li><strong>Scale the evaluation too.</strong> Monitor ID and OOD curves at each training-set size instead of reporting one blended score.</li>
-            <li><strong>Match validation to deployment.</strong> Test whether target-representative validation changes which model wins.</li>
-            <li><strong>Separate evidence from inference.</strong> Divergence was observed in the studied tasks; applying this diagnostic elsewhere is a practical recommendation, not a universal result.</li>
+            <li><strong>Measure scarcity.</strong> Track distinct target examples separately from total tokens seen.</li>
+            <li><strong>Mix for purpose.</strong> Combine scarce target data with general data instead of assuming either source should dominate.</li>
+            <li><strong>Count repeats.</strong> Log target-data exposure and test several repetition levels under matched compute.</li>
+            <li><strong>Hold out target examples.</strong> Check specialist or low-resource performance, plus general capability, after every recipe change.</li>
+            <li><strong>Treat 15–20 as evidence from this study.</strong> The optimum depends on data size, budget, and model scale.</li>
           </ul>
         </section>
-        <p class="story-close"><strong>The takeaway:</strong> More examples often help, but “better” depends on where performance is measured. Under distribution shift, scaling the training set without aligning model selection and validation to deployment can improve the score you see while weakening the generalization you need.</p>
+        <p class="story-close"><strong>The takeaway:</strong> When new independent data is scarce, scaling can mean allocating the examples you have more deliberately. Repetition may help inside a mixed-data recipe, but the correct amount is an empirical choice, not a universal constant.</p>
       </div>
     </article>
 
     <section class="grid" id="supporting-stories" aria-label="Supporting stories">
       <h2 class="section-label">More signals from today’s research</h2>
-      <article class="card small"><span class="number">01 / HIDDEN ASSUMPTION</span><h2>Random splits can hide the deployment gap</h2><p>The study retained natural shifts and used random splits as a control. Its scaling trends show why a familiar split alone may not reveal how models behave on a changed population.</p><p class="why"><b>Why this matters:</b> A benchmark can keep improving while the real-world target drifts away from it.</p><p class="source"><a href="https://arxiv.org/abs/2610.26794">Read the primary study ↗</a></p></article>
-      <article class="card small"><span class="number">02 / DEVELOPER COMMUNITY</span><h2>Inspect the experiments and reproduce the splits</h2><p>The authors publish code and experiment materials for their large-scale tabular study, making it possible to inspect dataset construction and model-selection choices.</p><p class="why"><b>Why this matters:</b> The split and tuning protocol can matter as much as the number of training rows.</p><p class="source"><a href="https://github.com/yandex-research/tabular-dl-more-data">Explore the authors’ repository ↗</a></p></article>
-      <article class="card wide"><span class="tag">After review · evaluation lesson</span><h2>Plot two curves, not one</h2><p>As training data grows, report performance on both an ID test set and a deployment-relevant OOD set. The study finds these can diverge at larger scales; target-representative validation helped MLP selection in the examined tasks.</p><p class="why"><b>Why this matters:</b> Separate curves reveal whether new data improves the target you care about or mainly the distribution you already know.</p></article>
+      <article class="card small"><span class="number">01 / HIDDEN COST</span><h2>More unique data is not the only budget</h2><p>Collecting specialist or low-resource-language examples can be expensive or slow. This study evaluates mixture training when target data itself is constrained.</p><p class="why"><b>Why this matters:</b> Teams can compare a data-collection budget with the value of better reuse and mixture tuning.</p><p class="source"><a href="https://machinelearning.apple.com/research/scaling-laws-mixture-pretraining">Read Apple ML Research’s study summary ↗</a></p></article>
+      <article class="card small"><span class="number">02 / DEVELOPER COMMUNITY</span><h2>Discuss the paper and its limits</h2><p>A public developer paper-notes thread links the study and summarizes its claims about repetition, scarce corpora, and mixture training.</p><p class="why"><b>Why this matters:</b> Practitioners can compare assumptions and ask whether the result transfers to their target domain.</p><p class="source"><a href="https://github.com/AkihikoWatanabe/paper_notes/issues/5530">Open the developer discussion ↗</a></p></article>
+      <article class="card wide"><span class="tag">After review · what to validate</span><h2>Count unique examples and repeat exposures separately</h2><p>A repeated token is not a new independent observation. When comparing a mixed recipe with a larger corpus, track both unique target examples and total target exposures, then score against held-out target data.</p><p class="why"><b>Why this matters:</b> The distinction shows whether a gain came from useful domain exposure or from counting passes as though they were new data.</p></article>
     </section>
 
     <section class="insights" aria-label="Quotes and reader question">
-      <article class="quote-card"><span class="tag">Quote 01 · arXiv study</span><blockquote>“performance mostly improve together at smaller scales”</blockquote><cite>— Rubachev, Lazarev &amp; Babenko, <a href="https://arxiv.org/abs/2610.26794">On Data Scaling in Tabular ML</a></cite><p class="why"><b>Why this matters:</b> Early gains can make scaling appear uniformly safe even when later behavior differs.</p></article>
-      <article class="quote-card"><span class="tag">Quote 02 · arXiv study</span><blockquote>“can diverge at larger scales”</blockquote><cite>— Rubachev, Lazarev &amp; Babenko, <a href="https://arxiv.org/abs/2610.26794">On Data Scaling in Tabular ML</a></cite><p class="why"><b>Why this matters:</b> One headline metric may conceal opposite trends across familiar and shifted populations.</p></article>
+      <article class="quote-card"><span class="tag">Quote 01 · 2026 study</span><blockquote>“too much target data repeats the same examples excessively”</blockquote><cite>— Sedova et al., <a href="https://arxiv.org/abs/2605.12715">Scaling Laws for Mixture Pretraining Under Data Constraints</a></cite><p class="why"><b>Why this matters:</b> Increasing a domain’s share can raise repetition even when its distinct corpus is fixed.</p></article>
+      <article class="quote-card"><span class="tag">Quote 02 · 2026 study</span><blockquote>“mixture training tolerates much higher repetition than single-source training”</blockquote><cite>— Sedova et al., <a href="https://arxiv.org/abs/2605.12715">Scaling Laws for Mixture Pretraining Under Data Constraints</a></cite><p class="why"><b>Why this matters:</b> The effect depends on the training mixture, so reuse policies should be tested in context.</p></article>
       <article class="reader-question" id="reader-question">
-        <span class="tag">Reader question</span><p>A tabular model’s score rises as you add data, but the production population shifts over time. What is the strongest next check?</p>
+        <span class="tag">Reader question</span><p>Your specialist corpus is small, and a new collection would be costly. Which experiment best tests whether reuse can help?</p>
         <fieldset class="mcq" aria-describedby="answer-feedback"><legend class="sr-only">Choose one answer</legend>
-          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">A. Keep the random split; a larger sample makes its score representative by itself.</button>
-          <button class="mcq-option" type="button" data-correct="true" aria-pressed="false">B. Track separate ID and deployment-like OOD performance, and select using target-representative validation.</button>
-          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">C. Add shifted production examples to training and validation, then report the combined score.</button>
+          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">A. Repeat the specialist corpus as often as possible; each pass is equivalent to new independent data.</button>
+          <button class="mcq-option" type="button" data-correct="true" aria-pressed="false">B. Compare target/general mixtures and repeat counts at matched compute, using held-out target examples.</button>
+          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">C. Avoid all repeats and replace the specialist corpus with generic data to preserve diversity.</button>
         </fieldset><p class="answer-feedback" id="answer-feedback" role="status" aria-live="polite">Choose an answer to see feedback.</p>
       </article>
     </section>
-    <aside class="community"><div><strong>From the developer community</strong><p>Inspect reproducibility materials, data processing, and experiments for scaling tabular models under natural shifts.</p></div><a href="https://github.com/yandex-research/tabular-dl-more-data">Open the research repository ↗</a></aside>
+    <aside class="community"><div><strong>From the developer community</strong><p>Read and discuss a public paper note on repetition-aware data mixtures for constrained pretraining.</p></div><a href="https://github.com/AkihikoWatanabe/paper_notes/issues/5530">Join the paper discussion ↗</a></aside>
     <footer>
       <span>Curated by <a href="https://github.com/tripathiswastik" target="_blank" rel="noopener">Swastik Tripathi</a> · <a href="https://www.linkedin.com/in/swastik-tripathi-52333511a/" target="_blank" rel="noopener">LinkedIn</a> · Sources linked inline</span>
       <span><a href="https://github.com/tripathiswastik/Weekly-data-scaling-newsletter" target="_blank" rel="noopener">GitHub</a> · Published via GitHub Pages</span>
@@ -194,8 +195,8 @@
       option.setAttribute('aria-pressed', 'true');
       feedback.className = `answer-feedback ${isCorrect ? 'correct' : 'incorrect'}`;
       feedback.textContent = isCorrect
-        ? 'Correct. Keep ID and deployment-like OOD evaluation separate, and align model selection with the target distribution.'
-        : 'Not quite. A random split or combined score can hide a deployment shift; preserve a target-representative holdout.';
+        ? 'Correct. Compare mixture and repeat schedules under matched compute and evaluate on held-out target examples.'
+        : 'Not quite. Repeats are not independent new examples, and all-generic data can underexpose the model to its target domain.';
     }));
   </script>
 </body>
