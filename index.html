@@ -107,60 +107,65 @@
       <p class="dek">One question, every day: when does scaling training data improve deep learning—and when do quality, repetition, compute, or infrastructure change the answer?</p>
     </section>
 
-    <div class="issuebar"><span><strong id="issue-number">ISSUE #12</strong> <time id="issue-date" datetime="2026-11-13">· Fri, Nov 13, 2026</time></span><span id="next-date">Next brief: Sat, November 14, 2026</span></div>
+    <div class="issuebar"><span><strong id="issue-number">ISSUE #22</strong> <time id="issue-date" datetime="2026-11-23">· Mon, Nov 23, 2026</time></span><span id="next-date">Next brief: Tue, November 24, 2026</span></div>
 
     <nav class="jump-links" aria-label="Jump to a newsletter section"><a href="#feature-story">Featured story</a><a href="#supporting-stories">More signals</a><a href="#reader-question">Reader quiz</a></nav>
 
     <article class="feature-story" id="feature-story" aria-labelledby="feature-title">
       <header class="story-head">
-        <div class="story-meta"><span class="tag">Today’s feature · underdog perspective</span></div>
-        <h2 id="feature-title">When the domain is small, repetition can be a scaling strategy</h2>
-        <p class="story-dek">A data-constrained study finds that scarce specialist or low-resource-language corpora can still contribute at scale—if they are mixed with general data and repeated deliberately.</p>
+        <div class="story-meta"><span class="tag">Today’s feature · myth buster</span></div>
+        <h2 id="feature-title">Filtering a skill may delay it, not erase it</h2>
+        <p class="story-dek">A new study asks whether broad training progress can partly stand in for skill-specific examples. Its answer complicates the idea that removing data reliably removes a capability.</p>
       </header>
       <div class="story-content">
-        <p>Many training plans quietly assume that a model can always be fed more distinct examples. That assumption breaks for low-resource languages, specialized fields, and other domains where the useful corpus is finite. Teams then face an apparent choice: underrepresent the target domain with generic data, or repeat a small target set until the model overfits.</p>
-        <h3>More than 2,000 training runs test the trade-off</h3>
-        <p>In <a href="https://arxiv.org/abs/2605.12715"><em>Scaling Laws for Mixture Pretraining Under Data Constraints</em></a>, Anastasiia Sedova, Skyler Seto, Natalie Schluter, and Pierre Ablin study mixtures of scarce target data and abundant generic data. Their experiments span more than 2,000 language-model training runs, multiple model and target-dataset sizes, and multilingual, domain-specific, and quality-filtered data.</p>
-        <p>The central finding challenges the simple rule “never repeat data.” In the studied mixtures, repetition is a major driver of target-domain performance, and mixed training tolerates more reuse than training on a single source. The authors report that scarce target corpora can be reused 15–20 times, but the best repetition count changes with corpus size, compute budget, and model scale. It is not a universal setting to copy into every recipe.</p>
-        <p>Why can repeating examples help? Generic data supplies breadth, while repeated target examples increase exposure to the specific language or domain the model must handle. The paper models both effects with a repetition-aware mixture scaling law: repeated target tokens provide diminishing value, while the generic component has a regularizing role. The goal is to choose a mixture based on the target corpus and budget instead of treating every repeated pass as either waste or free extra data.</p>
-        <h3>From “find more data” to “budget the exposure”</h3>
-        <p>The practical change is to measure effective target exposure, not just the raw size of the corpus. Record how often target examples recur, what proportion of training tokens comes from the generic pool, and how the model performs on held-out target examples. Sweep mixture ratios and repetition under a fixed compute budget; include a no-repeat or low-repeat baseline so the team can see when added passes stop helping.</p>
-        <p><strong>Evidence boundary:</strong> The authors tested particular training runs, data mixtures, and model scales. The 15–20 reuse range is their reported result across the studied settings, not a general promise that repetition will improve every model, or that repeated examples equal new independent information.</p>
-        <p><strong>Inference:</strong> For teams blocked on acquiring more specialist data, it may be more useful to first optimize how existing examples are mixed and revisited. That is a lower-cost experiment than launching a new collection effort, but only target-specific held-out evaluation can show whether it worked.</p>
+        <p>“Use more data” sounds simple: more examples should produce more capability. But a fresh preprint points to a less obvious effect. A model may acquire useful structure for a skill from other parts of its training, even when the skill’s own prediction targets are withheld. Later, it may need surprisingly little direct data to recover that skill.</p>
+        <h3>A controlled way to hide training signal</h3>
+        <p>In <a href="https://arxiv.org/abs/2611.24844"><em>General progress substitutes for specific training data in language models</em></a>, Mark Marosi and Peter Antal use “target thinning”: examples remain in the input stream, but the loss signal for selected skill-specific next-token targets is kept only at a chosen fraction. They test chess, Othello, molecular strings, bracket languages, and web text across models from small experiments to billions of parameters.</p>
+        <p>This is not simply removing every mention of a subject. The model can still see surrounding context; what is selectively reduced is direct supervision at the skill’s targets. That lets the authors measure how much related structure is learned while the model makes general progress on the rest of the data.</p>
+        <h3>General progress can act like a substitute</h3>
+        <p>In one chess result, a model never explicitly trained on positions where its king was in check ranked legal responses almost as well as a fully supervised comparison. When researchers later returned the withheld targets, the model acquired the measured skill using only a small fraction of the direct data needed from initialization. That fraction fell as the model progressed. A control rule of similar difficulty did not show the same shortcut, suggesting the effect was tied to the skill rather than difficulty alone.</p>
+        <p>The authors also report a 7-billion-parameter example: after Rust documents were filtered down to 3% of their share, the model closed half its Rust term-accuracy gap using 2.1% of the tokens the unfiltered comparison needed from initialization. This is a concrete warning against treating a data filter as a permanent capability boundary.</p>
+        <h3>What the result does—and does not—say</h3>
+        <p><strong>Evidence:</strong> In these experiments, broad training progress supplied information that partly substituted for direct skill targets, and later skill acquisition cost less data. The pattern appears across several constructed domains, with one reported Rust result at 7B scale.</p>
+        <p><strong>Inference:</strong> Filtering may be a weaker control than teams expect if adjacent data teaches reusable structure. Teams should test the capability directly after training and again after continued pretraining or fine-tuning. This is a practical implication, not proof that every filter fails.</p>
+        <p><strong>Limits:</strong> This is a new preprint. Its controlled tasks, metrics, recipes, and selected corpora do not cover every model or capability. A result on chess ranking or Rust term accuracy does not establish what happens for every behavior, nor does it show every additional token improves performance.</p>
         <section class="takeaway-box" aria-label="Bulleted breakdown">
           <h3>Bulleted breakdown</h3>
           <ul>
-            <li><strong>Measure scarcity.</strong> Track distinct target examples separately from total tokens seen.</li>
-            <li><strong>Mix for purpose.</strong> Combine scarce target data with general data instead of assuming either source should dominate.</li>
-            <li><strong>Count repeats.</strong> Log target-data exposure and test several repetition levels under matched compute.</li>
-            <li><strong>Hold out target examples.</strong> Check specialist or low-resource performance, plus general capability, after every recipe change.</li>
-            <li><strong>Treat 15–20 as evidence from this study.</strong> The optimum depends on data size, budget, and model scale.</li>
+            <li><strong>Filtering is not always deletion.</strong> In target thinning, inputs stay in context while selected loss targets are withheld.</li>
+            <li><strong>Related data can carry signal.</strong> Models learned parts of tested skills while training on the rest of the corpus.</li>
+            <li><strong>Recovery can be cheap.</strong> Returning direct targets took a small fraction of the from-scratch data in the reported experiments.</li>
+            <li><strong>Scale changes the risk.</strong> The paper reports the effect in a 7B Rust example as well as smaller tasks.</li>
+            <li><strong>Validate the exact capability.</strong> Treat this as a reason to test after training, not a universal forecast.</li>
           </ul>
         </section>
-        <p class="story-close"><strong>The takeaway:</strong> When new independent data is scarce, scaling can mean allocating the examples you have more deliberately. Repetition may help inside a mixed-data recipe, but the correct amount is an empirical choice, not a universal constant.</p>
+        <p class="story-close"><strong>The takeaway:</strong> More broad training can sometimes make withheld skills easier to acquire, because related structure transfers. Dataset size alone cannot tell whether a capability was removed, preserved indirectly, or made cheaper to relearn.</p>
       </div>
     </article>
 
     <section class="grid" id="supporting-stories" aria-label="Supporting stories">
       <h2 class="section-label">More signals from today’s research</h2>
-      <article class="card small"><span class="number">01 / HIDDEN COST</span><h2>More unique data is not the only budget</h2><p>Collecting specialist or low-resource-language examples can be expensive or slow. This study evaluates mixture training when target data itself is constrained.</p><p class="why"><b>Why this matters:</b> Teams can compare a data-collection budget with the value of better reuse and mixture tuning.</p><p class="source"><a href="https://machinelearning.apple.com/research/scaling-laws-mixture-pretraining">Read Apple ML Research’s study summary ↗</a></p></article>
-      <article class="card small"><span class="number">02 / DEVELOPER COMMUNITY</span><h2>Discuss the paper and its limits</h2><p>A public developer paper-notes thread links the study and summarizes its claims about repetition, scarce corpora, and mixture training.</p><p class="why"><b>Why this matters:</b> Practitioners can compare assumptions and ask whether the result transfers to their target domain.</p><p class="source"><a href="https://github.com/AkihikoWatanabe/paper_notes/issues/5530">Open the developer discussion ↗</a></p></article>
-      <article class="card wide"><span class="tag">After review · what to validate</span><h2>Count unique examples and repeat exposures separately</h2><p>A repeated token is not a new independent observation. When comparing a mixed recipe with a larger corpus, track both unique target examples and total target exposures, then score against held-out target data.</p><p class="why"><b>Why this matters:</b> The distinction shows whether a gain came from useful domain exposure or from counting passes as though they were new data.</p></article>
+      <article class="card small"><span class="number">01 / HIDDEN ASSUMPTION</span><h2>Removing targets is not removing context</h2><p>The study leaves skill-bearing inputs in the stream and withholds selected next-token loss targets. The remaining corpus can still teach structure that helps the model perform the skill.</p><p class="why"><b>Why this matters:</b> A filter’s effect depends on information around examples, not only the count of removed labels.</p><p class="source"><a href="https://arxiv.org/abs/2611.24844">Read the primary study ↗</a></p></article>
+      <article class="card small"><span class="number">02 / SCALE &amp; COST</span><h2>A 7B Rust model regained ground with little direct data</h2><p>A model trained with Rust documents reduced to 3% of their share closed half its Rust term-accuracy gap using 2.1% of the tokens the unfiltered comparison needed from initialization.</p><p class="why"><b>Why this matters:</b> Capability may become cheaper to reacquire after broad training, so filtering is not automatically a lasting barrier.</p><p class="source"><a href="https://github.com/Mapika/progress-substitutes-data">Review the authors’ code and experiment notes ↗</a></p></article>
+      <article class="card wide"><span class="tag">After review · what to validate</span><h2>Re-test after general training, not only after filtering</h2><p>A capability may be weak immediately after filtering yet easier to recover after the model improves elsewhere. Track held-out evaluations across continued training, and document which training signals were actually removed.</p><p class="why"><b>Why this matters:</b> One checkpoint can miss the point when general progress makes a filtered skill easier to recover.</p></article>
     </section>
 
+
     <section class="insights" aria-label="Quotes and reader question">
-      <article class="quote-card"><span class="tag">Quote 01 · 2026 study</span><blockquote>“too much target data repeats the same examples excessively”</blockquote><cite>— Sedova et al., <a href="https://arxiv.org/abs/2605.12715">Scaling Laws for Mixture Pretraining Under Data Constraints</a></cite><p class="why"><b>Why this matters:</b> Increasing a domain’s share can raise repetition even when its distinct corpus is fixed.</p></article>
-      <article class="quote-card"><span class="tag">Quote 02 · 2026 study</span><blockquote>“mixture training tolerates much higher repetition than single-source training”</blockquote><cite>— Sedova et al., <a href="https://arxiv.org/abs/2605.12715">Scaling Laws for Mixture Pretraining Under Data Constraints</a></cite><p class="why"><b>Why this matters:</b> The effect depends on the training mixture, so reuse policies should be tested in context.</p></article>
+      <article class="quote-card"><span class="tag">Quote 01 · 2026 preprint</span><blockquote>“general progress ... substitutes for the data that was withheld”</blockquote><cite>— Marosi &amp; Antal, <a href="https://arxiv.org/abs/2611.24844">General progress substitutes for specific training data in language models</a></cite><p class="why"><b>Why this matters:</b> A skill can receive indirect signal through the rest of the corpus.</p></article>
+      <article class="quote-card"><span class="tag">Quote 02 · 2026 preprint</span><blockquote>“this fraction decreased as the models progressed”</blockquote><cite>— Marosi &amp; Antal, <a href="https://arxiv.org/abs/2611.24844">General progress substitutes for specific training data in language models</a></cite><p class="why"><b>Why this matters:</b> The direct data needed later may depend on what the model learned in the meantime.</p></article>
       <article class="reader-question" id="reader-question">
-        <span class="tag">Reader question</span><p>Your specialist corpus is small, and a new collection would be costly. Which experiment best tests whether reuse can help?</p>
+        <span class="tag">Reader question</span><p>A filter reduces a skill’s direct targets but leaves related text in the corpus. What is the study’s main caution?</p>
         <fieldset class="mcq" aria-describedby="answer-feedback"><legend class="sr-only">Choose one answer</legend>
-          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">A. Repeat the specialist corpus as often as possible; each pass is equivalent to new independent data.</button>
-          <button class="mcq-option" type="button" data-correct="true" aria-pressed="false">B. Compare target/general mixtures and repeat counts at matched compute, using held-out target examples.</button>
-          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">C. Avoid all repeats and replace the specialist corpus with generic data to preserve diversity.</button>
+          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">A. Filtering guarantees the model will never learn the skill, even after further training.</button>
+          <button class="mcq-option" type="button" data-correct="true" aria-pressed="false">B. General progress may preserve related structure, making the skill cheaper to learn later.</button>
+          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">C. More total tokens always improve every capability, even if relevant signals are absent.</button>
         </fieldset><p class="answer-feedback" id="answer-feedback" role="status" aria-live="polite">Choose an answer to see feedback.</p>
       </article>
     </section>
-    <aside class="community"><div><strong>From the developer community</strong><p>Read and discuss a public paper note on repetition-aware data mixtures for constrained pretraining.</p></div><a href="https://github.com/AkihikoWatanabe/paper_notes/issues/5530">Join the paper discussion ↗</a></aside>
+    <aside class="community"><div><strong>From the developer community</strong><p>Inspect the authors’ open code and experiment notes for how target thinning and skill reacquisition were measured.</p></div><a href="https://github.com/Mapika/progress-substitutes-data">Explore the research code ↗</a></aside>
+    
+
     <footer>
       <span>Curated by <a href="https://github.com/tripathiswastik" target="_blank" rel="noopener">Swastik Tripathi</a> · <a href="https://www.linkedin.com/in/swastik-tripathi-52333511a/" target="_blank" rel="noopener">LinkedIn</a> · Sources linked inline</span>
       <span><a href="https://github.com/tripathiswastik/Weekly-data-scaling-newsletter" target="_blank" rel="noopener">GitHub</a> · Published via GitHub Pages</span>
