@@ -107,63 +107,64 @@
       <p class="dek">One question, every day: when does scaling training data improve deep learning—and when do quality, repetition, compute, or infrastructure change the answer?</p>
     </section>
 
-    <div class="issuebar"><span><strong id="issue-number">ISSUE #22</strong> <time id="issue-date" datetime="2026-11-23">· Mon, Nov 23, 2026</time></span><span id="next-date">Next brief: Tue, November 24, 2026</span></div>
+    <div class="issuebar"><span><strong id="issue-number">ISSUE #24</strong> <time id="issue-date" datetime="2026-11-25">· Wed, Nov 25, 2026</time></span><span id="next-date">Next brief: Thu, November 26, 2026</span></div>
 
     <nav class="jump-links" aria-label="Jump to a newsletter section"><a href="#feature-story">Featured story</a><a href="#supporting-stories">More signals</a><a href="#reader-question">Reader quiz</a></nav>
 
     <article class="feature-story" id="feature-story" aria-labelledby="feature-title">
       <header class="story-head">
-        <div class="story-meta"><span class="tag">Today’s feature · myth buster</span></div>
-        <h2 id="feature-title">Filtering a skill may delay it, not erase it</h2>
-        <p class="story-dek">A new study asks whether broad training progress can partly stand in for skill-specific examples. Its answer complicates the idea that removing data reliably removes a capability.</p>
+        <div class="story-meta"><span class="tag">Today’s feature · underdog perspective</span></div>
+        <h2 id="feature-title">When data is scarce, learn more from each repeat</h2>
+        <p class="story-dek">A single recipe for molecules, DNA and crystal structures suggests that the right training design can make a small corpus go much further—though inference costs and benchmark limits still count.</p>
       </header>
       <div class="story-content">
-        <p>“Use more data” sounds simple: more examples should produce more capability. But a fresh preprint points to a less obvious effect. A model may acquire useful structure for a skill from other parts of its training, even when the skill’s own prediction targets are withheld. Later, it may need surprisingly little direct data to recover that skill.</p>
-        <h3>A controlled way to hide training signal</h3>
-        <p>In <a href="https://arxiv.org/abs/2611.24844"><em>General progress substitutes for specific training data in language models</em></a>, Mark Marosi and Peter Antal use “target thinning”: examples remain in the input stream, but the loss signal for selected skill-specific next-token targets is kept only at a chosen fraction. They test chess, Othello, molecular strings, bracket languages, and web text across models from small experiments to billions of parameters.</p>
-        <p>This is not simply removing every mention of a subject. The model can still see surrounding context; what is selectively reduced is direct supervision at the skill’s targets. That lets the authors measure how much related structure is learned while the model makes general progress on the rest of the data.</p>
-        <h3>General progress can act like a substitute</h3>
-        <p>In one chess result, a model never explicitly trained on positions where its king was in check ranked legal responses almost as well as a fully supervised comparison. When researchers later returned the withheld targets, the model acquired the measured skill using only a small fraction of the direct data needed from initialization. That fraction fell as the model progressed. A control rule of similar difficulty did not show the same shortcut, suggesting the effect was tied to the skill rather than difficulty alone.</p>
-        <p>The authors also report a 7-billion-parameter example: after Rust documents were filtered down to 3% of their share, the model closed half its Rust term-accuracy gap using 2.1% of the tokens the unfiltered comparison needed from initialization. This is a concrete warning against treating a data filter as a permanent capability boundary.</p>
-        <h3>What the result does—and does not—say</h3>
-        <p><strong>Evidence:</strong> In these experiments, broad training progress supplied information that partly substituted for direct skill targets, and later skill acquisition cost less data. The pattern appears across several constructed domains, with one reported Rust result at 7B scale.</p>
-        <p><strong>Inference:</strong> Filtering may be a weaker control than teams expect if adjacent data teaches reusable structure. Teams should test the capability directly after training and again after continued pretraining or fine-tuning. This is a practical implication, not proof that every filter fails.</p>
-        <p><strong>Limits:</strong> This is a new preprint. Its controlled tasks, metrics, recipes, and selected corpora do not cover every model or capability. A result on chess ranking or Rust term accuracy does not establish what happens for every behavior, nor does it show every additional token improves performance.</p>
+        <p>For many scientific models, “collect more data” is not an easy next step. Molecules need measured properties, crystal structures may require expensive simulations, and genomic references cover only a fraction of life’s diversity. A November study from Q Labs asks a narrower question: when the training set cannot grow, can a model extract more useful learning from repeated passes?</p>
+        <h3>One recipe, three very different data types</h3>
+        <p>In <a href="https://qlabs.sh/research/applications"><em>Towards Universal Data-Efficient Pretraining</em></a>, Anirudh Satheesh, Bishwas Mandal, Madhav Singhal, Akshay Vegesna and Samip Dahal test molecules encoded as SMILES, eukaryotic DNA sequences and crystal structures. They combine two main ideas: <strong>snapshot ensembling</strong>, which averages predictions from checkpoints saved during one cyclic training run, and <strong>looped depth</strong>, which reuses transformer blocks to add computation without adding as many parameters that can memorize a small dataset. The recipe also changes weight decay through cycles and uses other regularization.</p>
+        <p>The study compares against established domain-specific baselines using held-out data and reports results in “data multipliers”: how much unique data a baseline would need to match a measured loss. The authors report up to 56× for molecules and 24× for DNA and crystals. In one molecular comparison, their recipe reaches the loss of a released model trained on 4.4 billion tokens with about 85 million unique tokens. The point is not that repeated tokens become new observations. It is that optimization, architecture and averaging can change how much useful signal the model extracts from the observations it has.</p>
+        <h3>The hidden bill moves to inference</h3>
+        <p>Checkpoint averaging is not free at serving time. Each added snapshot requires another forward pass. In the DNA benchmark, four snapshots nearly match the reported loss of a much larger single-pass model at the same measured scoring cost. Adding snapshots beyond four changes the loss very little, while using all 64 makes generation substantially slower. This is a practical design lesson: measure the curve of quality against serving latency and cost, then stop when extra ensemble members no longer pay for themselves.</p>
+        <p><strong>Evidence:</strong> Across these three tested scientific domains, the authors report lower held-out loss and downstream gains from a shared repeated-data recipe. Their page describes the training budgets, held-out evaluations and component ablations. Some headline multipliers are marked as extrapolations where the result extends beyond a baseline’s longest run.</p>
+        <p><strong>Inference:</strong> For a data-constrained team, the next experiment may be a better use of existing data rather than an expensive collection campaign. But the recipe is a research result, not a plug-in guarantee: baseline choice, model scale, task metrics and deployment latency can change the decision.</p>
+        <p><strong>Limits:</strong> The reported models are modest by frontier language-model standards, and the tests cover three specialized scientific domains. This does not establish the same gain for arbitrary datasets or general-purpose models. The headline multipliers also compare against specific baselines; they are not a universal conversion rate from tokens to performance.</p>
         <section class="takeaway-box" aria-label="Bulleted breakdown">
           <h3>Bulleted breakdown</h3>
           <ul>
-            <li><strong>Filtering is not always deletion.</strong> In target thinning, inputs stay in context while selected loss targets are withheld.</li>
-            <li><strong>Related data can carry signal.</strong> Models learned parts of tested skills while training on the rest of the corpus.</li>
-            <li><strong>Recovery can be cheap.</strong> Returning direct targets took a small fraction of the from-scratch data in the reported experiments.</li>
-            <li><strong>Scale changes the risk.</strong> The paper reports the effect in a 7B Rust example as well as smaller tasks.</li>
-            <li><strong>Validate the exact capability.</strong> Treat this as a reason to test after training, not a universal forecast.</li>
+            <li><strong>Scarcity is real in science.</strong> New labels or structures can require costly experiments, computation or curation.</li>
+            <li><strong>Reuse can be redesigned.</strong> Cyclic checkpoints, prediction averaging and shared-weight depth help the model learn from repeated data.</li>
+            <li><strong>Large multipliers are baseline-relative.</strong> Q Labs reports up to 56× for molecules and 24× for DNA and crystals on its chosen comparisons.</li>
+            <li><strong>Inference has a price.</strong> More snapshots add forward passes; in the DNA test, most ensemble gain arrived by four.</li>
+            <li><strong>Reproduce before generalizing.</strong> The results concern specific models, datasets, baselines and scientific evaluations.</li>
           </ul>
         </section>
-        <p class="story-close"><strong>The takeaway:</strong> More broad training can sometimes make withheld skills easier to acquire, because related structure transfers. Dataset size alone cannot tell whether a capability was removed, preserved indirectly, or made cheaper to relearn.</p>
+        <p class="story-close"><strong>The takeaway:</strong> More unique data is not the only route to better performance. In constrained settings, training design can make each example work harder—but the honest comparison includes compute, inference cost, held-out tasks and the limits of the benchmark.</p>
       </div>
     </article>
 
     <section class="grid" id="supporting-stories" aria-label="Supporting stories">
       <h2 class="section-label">More signals from today’s research</h2>
-      <article class="card small"><span class="number">01 / HIDDEN ASSUMPTION</span><h2>Removing targets is not removing context</h2><p>The study leaves skill-bearing inputs in the stream and withholds selected next-token loss targets. The remaining corpus can still teach structure that helps the model perform the skill.</p><p class="why"><b>Why this matters:</b> A filter’s effect depends on information around examples, not only the count of removed labels.</p><p class="source"><a href="https://arxiv.org/abs/2611.24844">Read the primary study ↗</a></p></article>
-      <article class="card small"><span class="number">02 / SCALE &amp; COST</span><h2>A 7B Rust model regained ground with little direct data</h2><p>A model trained with Rust documents reduced to 3% of their share closed half its Rust term-accuracy gap using 2.1% of the tokens the unfiltered comparison needed from initialization.</p><p class="why"><b>Why this matters:</b> Capability may become cheaper to reacquire after broad training, so filtering is not automatically a lasting barrier.</p><p class="source"><a href="https://github.com/Mapika/progress-substitutes-data">Review the authors’ code and experiment notes ↗</a></p></article>
-      <article class="card wide"><span class="tag">After review · what to validate</span><h2>Re-test after general training, not only after filtering</h2><p>A capability may be weak immediately after filtering yet easier to recover after the model improves elsewhere. Track held-out evaluations across continued training, and document which training signals were actually removed.</p><p class="why"><b>Why this matters:</b> One checkpoint can miss the point when general progress makes a filtered skill easier to recover.</p></article>
+      <article class="card small"><span class="number">01 / UNDERDOG</span><h2>Scientific models get a data-efficiency recipe</h2><p>The same snapshot-and-looping approach was tested on molecular strings, eukaryotic DNA and crystal structures rather than only web text. The authors report downstream improvements across MoleculeNet, genome benchmarks and Matbench.</p><p class="why"><b>Why this matters:</b> A method developed for language-model training may help fields where each new example is expensive to produce.</p><p class="source"><a href="https://qlabs.sh/research/applications">Read the authors’ study and results ↗</a></p></article>
+      <article class="card small"><span class="number">02 / HIDDEN COST</span><h2>More snapshots trade serving time for a small loss gain</h2><p>In the authors’ DNA generation table, four snapshots take about 3.1 minutes per 100,000 bases and 64 take 19.4 minutes, while the reported loss is nearly flat beyond four.</p><p class="why"><b>Why this matters:</b> Training-data efficiency can shift the bill to inference, so benchmark latency as well as training loss.</p><p class="source"><a href="https://qlabs.sh/research/applications#inference-costs">Review the study’s inference-cost section ↗</a></p></article>
+      <article class="card wide"><span class="tag">After review · claim boundaries</span><h2>Read “56× data” as a comparison, not a universal law</h2><p>The study defines its multiplier against named domain baselines and notes that estimates beyond a baseline’s longest run extrapolate the final curve segment. Replication against additional baselines and larger models would clarify how far the result travels.</p><p class="why"><b>Why this matters:</b> Relative efficiency can look dramatic while still depending on a baseline’s measured range and slope.</p></article>
     </section>
+
 
 
     <section class="insights" aria-label="Quotes and reader question">
-      <article class="quote-card"><span class="tag">Quote 01 · 2026 preprint</span><blockquote>“general progress ... substitutes for the data that was withheld”</blockquote><cite>— Marosi &amp; Antal, <a href="https://arxiv.org/abs/2611.24844">General progress substitutes for specific training data in language models</a></cite><p class="why"><b>Why this matters:</b> A skill can receive indirect signal through the rest of the corpus.</p></article>
-      <article class="quote-card"><span class="tag">Quote 02 · 2026 preprint</span><blockquote>“this fraction decreased as the models progressed”</blockquote><cite>— Marosi &amp; Antal, <a href="https://arxiv.org/abs/2611.24844">General progress substitutes for specific training data in language models</a></cite><p class="why"><b>Why this matters:</b> The direct data needed later may depend on what the model learned in the meantime.</p></article>
+      <article class="quote-card"><span class="tag">Quote 01 · Q Labs study</span><blockquote>“one training run is worth up to 56× as much unique data for molecules”</blockquote><cite>— Satheesh et al., <a href="https://qlabs.sh/research/applications">Towards Universal Data-Efficient Pretraining</a></cite><p class="why"><b>Why this matters:</b> This is the paper’s strongest example of training design improving data efficiency in a constrained domain.</p></article>
+      <article class="quote-card"><span class="tag">Quote 02 · Q Labs study</span><blockquote>“snapshot ensembling has a price”</blockquote><cite>— Satheesh et al., <a href="https://qlabs.sh/research/applications#inference-costs">Towards Universal Data-Efficient Pretraining · inference costs</a></cite><p class="why"><b>Why this matters:</b> Better use of training data can add compute at prediction time.</p></article>
       <article class="reader-question" id="reader-question">
-        <span class="tag">Reader question</span><p>A filter reduces a skill’s direct targets but leaves related text in the corpus. What is the study’s main caution?</p>
+        <span class="tag">Reader question</span><p>A small-data model improves when averaging checkpoints, but latency rises with every snapshot. Which next step best tests whether the recipe is useful in production?</p>
         <fieldset class="mcq" aria-describedby="answer-feedback"><legend class="sr-only">Choose one answer</legend>
-          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">A. Filtering guarantees the model will never learn the skill, even after further training.</button>
-          <button class="mcq-option" type="button" data-correct="true" aria-pressed="false">B. General progress may preserve related structure, making the skill cheaper to learn later.</button>
-          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">C. More total tokens always improve every capability, even if relevant signals are absent.</button>
+          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">A. Keep all snapshots: better training loss guarantees lower total serving cost.</button>
+          <button class="mcq-option" type="button" data-correct="true" aria-pressed="false">B. Measure held-out task quality against latency and serving cost as snapshot count changes.</button>
+          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">C. Treat the largest reported data multiplier as a universal prediction for other domains.</button>
         </fieldset><p class="answer-feedback" id="answer-feedback" role="status" aria-live="polite">Choose an answer to see feedback.</p>
       </article>
     </section>
-    <aside class="community"><div><strong>From the developer community</strong><p>Inspect the authors’ open code and experiment notes for how target thinning and skill reacquisition were measured.</p></div><a href="https://github.com/Mapika/progress-substitutes-data">Explore the research code ↗</a></aside>
+    <aside class="community"><div><strong>From the developer community</strong><p>Follow the Hacker News discussion of the paper and compare practitioner questions about data efficiency and its claims.</p></div><a href="https://news.ycombinator.com/item?id=50556034">Open the discussion ↗</a></aside>
+    
+
     
 
     <footer>
@@ -200,8 +201,8 @@
       option.setAttribute('aria-pressed', 'true');
       feedback.className = `answer-feedback ${isCorrect ? 'correct' : 'incorrect'}`;
       feedback.textContent = isCorrect
-        ? 'Correct. Compare mixture and repeat schedules under matched compute and evaluate on held-out target examples.'
-        : 'Not quite. Repeats are not independent new examples, and all-generic data can underexpose the model to its target domain.';
+        ? 'Correct. Compare held-out task quality with latency and serving cost as you add snapshots.'
+        : 'Not quite. Training efficiency does not guarantee cheap serving or transfer to another domain; measure the quality-cost trade-off.';
     }));
   </script>
 </body>
