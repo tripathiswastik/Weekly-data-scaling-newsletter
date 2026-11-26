@@ -107,62 +107,66 @@
       <p class="dek">One question, every day: when does scaling training data improve deep learning—and when do quality, repetition, compute, or infrastructure change the answer?</p>
     </section>
 
-    <div class="issuebar"><span><strong id="issue-number">ISSUE #24</strong> <time id="issue-date" datetime="2026-11-25">· Wed, Nov 25, 2026</time></span><span id="next-date">Next brief: Thu, November 26, 2026</span></div>
+    <div class="issuebar"><span><strong id="issue-number">ISSUE #25</strong> <time id="issue-date" datetime="2026-11-26">· Thu, Nov 26, 2026</time></span><span id="next-date">Next brief: Fri, November 27, 2026</span></div>
 
     <nav class="jump-links" aria-label="Jump to a newsletter section"><a href="#feature-story">Featured story</a><a href="#supporting-stories">More signals</a><a href="#reader-question">Reader quiz</a></nav>
 
     <article class="feature-story" id="feature-story" aria-labelledby="feature-title">
       <header class="story-head">
-        <div class="story-meta"><span class="tag">Today’s feature · underdog perspective</span></div>
-        <h2 id="feature-title">When data is scarce, learn more from each repeat</h2>
-        <p class="story-dek">A single recipe for molecules, DNA and crystal structures suggests that the right training design can make a small corpus go much further—though inference costs and benchmark limits still count.</p>
+        <div class="story-meta"><span class="tag">Today’s feature · from one-size-fits-all to task fit</span></div>
+        <h2 id="feature-title">Same number of words. Different model skills.</h2>
+        <p class="story-dek">A paired study of small language models finds no universal “best” corpus: two equal-size text sources produced different strengths on different benchmarks.</p>
       </header>
       <div class="story-content">
-        <p>For many scientific models, “collect more data” is not an easy next step. Molecules need measured properties, crystal structures may require expensive simulations, and genomic references cover only a fraction of life’s diversity. A November study from Q Labs asks a narrower question: when the training set cannot grow, can a model extract more useful learning from repeated passes?</p>
-        <h3>One recipe, three very different data types</h3>
-        <p>In <a href="https://qlabs.sh/research/applications"><em>Towards Universal Data-Efficient Pretraining</em></a>, Anirudh Satheesh, Bishwas Mandal, Madhav Singhal, Akshay Vegesna and Samip Dahal test molecules encoded as SMILES, eukaryotic DNA sequences and crystal structures. They combine two main ideas: <strong>snapshot ensembling</strong>, which averages predictions from checkpoints saved during one cyclic training run, and <strong>looped depth</strong>, which reuses transformer blocks to add computation without adding as many parameters that can memorize a small dataset. The recipe also changes weight decay through cycles and uses other regularization.</p>
-        <p>The study compares against established domain-specific baselines using held-out data and reports results in “data multipliers”: how much unique data a baseline would need to match a measured loss. The authors report up to 56× for molecules and 24× for DNA and crystals. In one molecular comparison, their recipe reaches the loss of a released model trained on 4.4 billion tokens with about 85 million unique tokens. The point is not that repeated tokens become new observations. It is that optimization, architecture and averaging can change how much useful signal the model extracts from the observations it has.</p>
-        <h3>The hidden bill moves to inference</h3>
-        <p>Checkpoint averaging is not free at serving time. Each added snapshot requires another forward pass. In the DNA benchmark, four snapshots nearly match the reported loss of a much larger single-pass model at the same measured scoring cost. Adding snapshots beyond four changes the loss very little, while using all 64 makes generation substantially slower. This is a practical design lesson: measure the curve of quality against serving latency and cost, then stop when extra ensemble members no longer pay for themselves.</p>
-        <p><strong>Evidence:</strong> Across these three tested scientific domains, the authors report lower held-out loss and downstream gains from a shared repeated-data recipe. Their page describes the training budgets, held-out evaluations and component ablations. Some headline multipliers are marked as extrapolations where the result extends beyond a baseline’s longest run.</p>
-        <p><strong>Inference:</strong> For a data-constrained team, the next experiment may be a better use of existing data rather than an expensive collection campaign. But the recipe is a research result, not a plug-in guarantee: baseline choice, model scale, task metrics and deployment latency can change the decision.</p>
-        <p><strong>Limits:</strong> The reported models are modest by frontier language-model standards, and the tests cover three specialized scientific domains. This does not establish the same gain for arbitrary datasets or general-purpose models. The headline multipliers also compare against specific baselines; they are not a universal conversion rate from tokens to performance.</p>
+        <p>“More data” is easy to count; “better data” is harder to define. A corpus can teach some patterns especially well while providing little practice for others. That makes one aggregate score a risky guide to scaling: it can hide a model that improved on one task and slipped on another.</p>
+        <h3>A controlled comparison of old and new text</h3>
+        <p>In <a href="https://aclanthology.org/2026.babylm-main.33/"><em>Different Corpora, Different Skills? A Paired Study of Small Language Models</em></a>, Edoardo Vaira, Georgios Chavales and Pierre Nugues compare the 1911 <em>Encyclopaedia Britannica</em> with the heterogeneous BabyLM 2026 strict corpus. They train at matched 10-million- and 37-million-word budgets, using the same model families, training recipes and evaluation procedures. The study includes teachers, 58-million-parameter Baby-Llama students trained with knowledge distillation, and student models without distillation.</p>
+        <p>Across five benchmarks, the outcome is not one corpus winning everywhere. BabyLM is consistently stronger on linguistic acceptability tests; Britannica is often stronger on Entity Tracking, a synthetic task that checks whether a model follows changing facts about entities through a text. The difference appears for teacher and student models and at both word budgets. In the clearest replicated student comparison, the corpus choice shifts the model’s relative skill profile.</p>
+        <p>The team also runs targeted controls. The central contrast persists when they match training exposure and test with a longer diagnostic context. Directly ensembling the teachers does not reproduce the Britannica student’s Entity Tracking behavior. Still, the size of that Entity Tracking advantage varies with training dynamics, so the paper does not establish a clean, universal rule about encyclopedic text.</p>
+        <h3>The hidden budget: what “same size” means</h3>
+        <p>The comparison matches word counts and training procedure, but the authors explicitly note that each corpus learns its own vocabulary. As a result, the two conditions do not have equal token counts or identical vocabularies. That matters when interpreting “same data budget”: equal words are a fair controlled choice for this question, but they are not the only resource measure. Tokenization can change how much sequence the model processes and which units it sees.</p>
+        <p><strong>Evidence:</strong> For this corpus pair and small-model setup, the paper reports different relative benchmark strengths rather than a single overall quality ranking. The work appears in the Proceedings of the Second BabyLM Workshop; the <a href="https://arxiv.org/abs/2611.07812">arXiv version</a> includes the same study and limitations.</p>
+        <p><strong>Inference:</strong> If a team adds more of one source, the score that matters should be the target task and the evaluation set—not a convenient average alone. A useful scaling experiment records words, tokens, vocabulary, compute and task-by-task results. Otherwise, the data budget may grow while the intended skill barely moves.</p>
+        <p><strong>Limits:</strong> This is a controlled study of two corpora and 58M student models, not a survey of all pretraining sources or frontier systems. Entity Tracking is synthetic, and even the authors note training-dynamics sensitivity. The result is a reason to test corpus fit, not proof that either historical or child-directed text is generally superior.</p>
         <section class="takeaway-box" aria-label="Bulleted breakdown">
           <h3>Bulleted breakdown</h3>
           <ul>
-            <li><strong>Scarcity is real in science.</strong> New labels or structures can require costly experiments, computation or curation.</li>
-            <li><strong>Reuse can be redesigned.</strong> Cyclic checkpoints, prediction averaging and shared-weight depth help the model learn from repeated data.</li>
-            <li><strong>Large multipliers are baseline-relative.</strong> Q Labs reports up to 56× for molecules and 24× for DNA and crystals on its chosen comparisons.</li>
-            <li><strong>Inference has a price.</strong> More snapshots add forward passes; in the DNA test, most ensemble gain arrived by four.</li>
-            <li><strong>Reproduce before generalizing.</strong> The results concern specific models, datasets, baselines and scientific evaluations.</li>
+            <li><strong>Same word budget, different sources.</strong> The study compares Britannica and BabyLM at 10M and 37M words under matched training procedures.</li>
+            <li><strong>Strengths split by task.</strong> BabyLM did better on linguistic acceptability; Britannica often did better on synthetic entity tracking.</li>
+            <li><strong>No single quality ladder emerged.</strong> The winner depended on which capability was measured.</li>
+            <li><strong>Words are not tokens.</strong> Corpus-specific vocabularies mean equal word budgets did not equalize token counts.</li>
+            <li><strong>Scale against the goal.</strong> Pair resource accounting with several held-out benchmarks tied to the intended use.</li>
           </ul>
         </section>
-        <p class="story-close"><strong>The takeaway:</strong> More unique data is not the only route to better performance. In constrained settings, training design can make each example work harder—but the honest comparison includes compute, inference cost, held-out tasks and the limits of the benchmark.</p>
+        <p class="story-close"><strong>The takeaway:</strong> A larger corpus can improve measured performance, but corpus content helps determine which performance. “Scale it” is incomplete advice until the team defines the task, counts the budget carefully and checks more than one outcome.</p>
       </div>
     </article>
 
     <section class="grid" id="supporting-stories" aria-label="Supporting stories">
       <h2 class="section-label">More signals from today’s research</h2>
-      <article class="card small"><span class="number">01 / UNDERDOG</span><h2>Scientific models get a data-efficiency recipe</h2><p>The same snapshot-and-looping approach was tested on molecular strings, eukaryotic DNA and crystal structures rather than only web text. The authors report downstream improvements across MoleculeNet, genome benchmarks and Matbench.</p><p class="why"><b>Why this matters:</b> A method developed for language-model training may help fields where each new example is expensive to produce.</p><p class="source"><a href="https://qlabs.sh/research/applications">Read the authors’ study and results ↗</a></p></article>
-      <article class="card small"><span class="number">02 / HIDDEN COST</span><h2>More snapshots trade serving time for a small loss gain</h2><p>In the authors’ DNA generation table, four snapshots take about 3.1 minutes per 100,000 bases and 64 take 19.4 minutes, while the reported loss is nearly flat beyond four.</p><p class="why"><b>Why this matters:</b> Training-data efficiency can shift the bill to inference, so benchmark latency as well as training loss.</p><p class="source"><a href="https://qlabs.sh/research/applications#inference-costs">Review the study’s inference-cost section ↗</a></p></article>
-      <article class="card wide"><span class="tag">After review · claim boundaries</span><h2>Read “56× data” as a comparison, not a universal law</h2><p>The study defines its multiplier against named domain baselines and notes that estimates beyond a baseline’s longest run extrapolate the final curve segment. Replication against additional baselines and larger models would clarify how far the result travels.</p><p class="why"><b>Why this matters:</b> Relative efficiency can look dramatic while still depending on a baseline’s measured range and slope.</p></article>
+      <article class="card small"><span class="number">01 / HIDDEN ASSUMPTION</span><h2>Equal words did not mean equal tokens</h2><p>The paired study holds source-word budgets and procedures steady, but corpus-specific tokenizers produce different vocabularies and token counts.</p><p class="why"><b>Why this matters:</b> Report both words and tokens so “same-size dataset” does not conceal a different training exposure.</p><p class="source"><a href="https://aclanthology.org/2026.babylm-main.33/">Read the published paper ↗</a></p></article>
+      <article class="card small"><span class="number">02 / WRONG DIRECTION</span><h2>Replace “best corpus” with “best fit for this task”</h2><p>BabyLM and Britannica trade places across linguistic acceptability and Entity Tracking rather than forming one universal quality ranking.</p><p class="why"><b>Why this matters:</b> A score can rise on average while a capability the product needs remains weak.</p><p class="source"><a href="https://arxiv.org/abs/2611.07812">See the authors’ benchmark and control details ↗</a></p></article>
+      <article class="card wide"><span class="tag">After review · next validation</span><h2>Repeat the comparison on your own target skills</h2><p>The result supports multi-benchmark checks, but it covers two sources and small student models. Follow-up work should vary corpus pairs, tokenize under matched token budgets as well as word budgets, and repeat seeds on the metrics that matter in deployment.</p><p class="why"><b>Why this matters:</b> The follow-up separates real corpus effects from choices about vocabulary, exposure and a narrow benchmark.</p></article>
     </section>
+
 
 
 
     <section class="insights" aria-label="Quotes and reader question">
-      <article class="quote-card"><span class="tag">Quote 01 · Q Labs study</span><blockquote>“one training run is worth up to 56× as much unique data for molecules”</blockquote><cite>— Satheesh et al., <a href="https://qlabs.sh/research/applications">Towards Universal Data-Efficient Pretraining</a></cite><p class="why"><b>Why this matters:</b> This is the paper’s strongest example of training design improving data efficiency in a constrained domain.</p></article>
-      <article class="quote-card"><span class="tag">Quote 02 · Q Labs study</span><blockquote>“snapshot ensembling has a price”</blockquote><cite>— Satheesh et al., <a href="https://qlabs.sh/research/applications#inference-costs">Towards Universal Data-Efficient Pretraining · inference costs</a></cite><p class="why"><b>Why this matters:</b> Better use of training data can add compute at prediction time.</p></article>
+      <article class="quote-card"><span class="tag">Quote 01 · workshop paper</span><blockquote>“different skill profiles rather than a single quality ranking”</blockquote><cite>— Vaira, Chavales &amp; Nugues, <a href="https://aclanthology.org/2026.babylm-main.33/">Different Corpora, Different Skills?</a></cite><p class="why"><b>Why this matters:</b> The corpus that helps one benchmark may not lead on another.</p></article>
+      <article class="quote-card"><span class="tag">Quote 02 · workshop paper</span><blockquote>“motivating multi-benchmark evaluation when comparing pretraining data”</blockquote><cite>— Vaira, Chavales &amp; Nugues, <a href="https://arxiv.org/abs/2611.07812">Different Corpora, Different Skills?</a></cite><p class="why"><b>Why this matters:</b> Several task checks make a data decision harder to overfit to one score.</p></article>
       <article class="reader-question" id="reader-question">
-        <span class="tag">Reader question</span><p>A small-data model improves when averaging checkpoints, but latency rises with every snapshot. Which next step best tests whether the recipe is useful in production?</p>
+        <span class="tag">Reader question</span><p>Two corpora use the same word budget, but each wins on different benchmark skills. What is the soundest conclusion?</p>
         <fieldset class="mcq" aria-describedby="answer-feedback"><legend class="sr-only">Choose one answer</legend>
-          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">A. Keep all snapshots: better training loss guarantees lower total serving cost.</button>
-          <button class="mcq-option" type="button" data-correct="true" aria-pressed="false">B. Measure held-out task quality against latency and serving cost as snapshot count changes.</button>
-          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">C. Treat the largest reported data multiplier as a universal prediction for other domains.</button>
+          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">A. Pick whichever corpus wins the average score; its strengths will transfer to every task.</button>
+          <button class="mcq-option" type="button" data-correct="true" aria-pressed="false">B. Corpus choice changes skill profiles here; compare task fit and account for words and tokens.</button>
+          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">C. Equal word counts guarantee equal training exposure, so only the model size can explain differences.</button>
         </fieldset><p class="answer-feedback" id="answer-feedback" role="status" aria-live="polite">Choose an answer to see feedback.</p>
       </article>
     </section>
-    <aside class="community"><div><strong>From the developer community</strong><p>Follow the Hacker News discussion of the paper and compare practitioner questions about data efficiency and its claims.</p></div><a href="https://news.ycombinator.com/item?id=50556034">Open the discussion ↗</a></aside>
+    <aside class="community"><div><strong>From the developer community</strong><p>Browse the authors’ open code for the single-cell data-scaling study, or use its issue tracker to discuss reproduction and evaluation choices.</p></div><a href="https://github.com/microsoft/scFM-dataselection/issues">Open the research code discussion ↗</a></aside>
+    
+
     
 
     
@@ -201,8 +205,8 @@
       option.setAttribute('aria-pressed', 'true');
       feedback.className = `answer-feedback ${isCorrect ? 'correct' : 'incorrect'}`;
       feedback.textContent = isCorrect
-        ? 'Correct. Compare held-out task quality with latency and serving cost as you add snapshots.'
-        : 'Not quite. Training efficiency does not guarantee cheap serving or transfer to another domain; measure the quality-cost trade-off.';
+        ? 'Correct. Compare the exact task scores, and remember that matched words did not mean matched token counts in this study.'
+        : 'Not quite. A single average can hide skill differences, and equal word counts do not guarantee equal token exposure.';
     }));
   </script>
 </body>
