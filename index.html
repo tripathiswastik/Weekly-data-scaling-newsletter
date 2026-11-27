@@ -107,64 +107,68 @@
       <p class="dek">One question, every day: when does scaling training data improve deep learning—and when do quality, repetition, compute, or infrastructure change the answer?</p>
     </section>
 
-    <div class="issuebar"><span><strong id="issue-number">ISSUE #25</strong> <time id="issue-date" datetime="2026-11-26">· Thu, Nov 26, 2026</time></span><span id="next-date">Next brief: Fri, November 27, 2026</span></div>
+    <div class="issuebar"><span><strong id="issue-number">ISSUE #26</strong> <time id="issue-date" datetime="2026-11-27">· Fri, Nov 27, 2026</time></span><span id="next-date">Next brief: Sat, November 28, 2026</span></div>
 
     <nav class="jump-links" aria-label="Jump to a newsletter section"><a href="#feature-story">Featured story</a><a href="#supporting-stories">More signals</a><a href="#reader-question">Reader quiz</a></nav>
 
     <article class="feature-story" id="feature-story" aria-labelledby="feature-title">
       <header class="story-head">
-        <div class="story-meta"><span class="tag">Today’s feature · from one-size-fits-all to task fit</span></div>
-        <h2 id="feature-title">Same number of words. Different model skills.</h2>
-        <p class="story-dek">A paired study of small language models finds no universal “best” corpus: two equal-size text sources produced different strengths on different benchmarks.</p>
+        <div class="story-meta"><span class="tag">Today’s feature · wrong direction to better targeting</span></div>
+        <h2 id="feature-title">A smaller fact set helped a small model remember more</h2>
+        <p class="story-dek">A 2026 ICML study finds that adding every fact can crowd a model’s limited memory. Targeted data selection improved fact recall—but the selection process itself carried a compute bill.</p>
       </header>
       <div class="story-content">
-        <p>“More data” is easy to count; “better data” is harder to define. A corpus can teach some patterns especially well while providing little practice for others. That makes one aggregate score a risky guide to scaling: it can hide a model that improved on one task and slipped on another.</p>
-        <h3>A controlled comparison of old and new text</h3>
-        <p>In <a href="https://aclanthology.org/2026.babylm-main.33/"><em>Different Corpora, Different Skills? A Paired Study of Small Language Models</em></a>, Edoardo Vaira, Georgios Chavales and Pierre Nugues compare the 1911 <em>Encyclopaedia Britannica</em> with the heterogeneous BabyLM 2026 strict corpus. They train at matched 10-million- and 37-million-word budgets, using the same model families, training recipes and evaluation procedures. The study includes teachers, 58-million-parameter Baby-Llama students trained with knowledge distillation, and student models without distillation.</p>
-        <p>Across five benchmarks, the outcome is not one corpus winning everywhere. BabyLM is consistently stronger on linguistic acceptability tests; Britannica is often stronger on Entity Tracking, a synthetic task that checks whether a model follows changing facts about entities through a text. The difference appears for teacher and student models and at both word budgets. In the clearest replicated student comparison, the corpus choice shifts the model’s relative skill profile.</p>
-        <p>The team also runs targeted controls. The central contrast persists when they match training exposure and test with a longer diagnostic context. Directly ensembling the teachers does not reproduce the Britannica student’s Entity Tracking behavior. Still, the size of that Entity Tracking advantage varies with training dynamics, so the paper does not establish a clean, universal rule about encyclopedic text.</p>
-        <h3>The hidden budget: what “same size” means</h3>
-        <p>The comparison matches word counts and training procedure, but the authors explicitly note that each corpus learns its own vocabulary. As a result, the two conditions do not have equal token counts or identical vocabularies. That matters when interpreting “same data budget”: equal words are a fair controlled choice for this question, but they are not the only resource measure. Tokenization can change how much sequence the model processes and which units it sees.</p>
-        <p><strong>Evidence:</strong> For this corpus pair and small-model setup, the paper reports different relative benchmark strengths rather than a single overall quality ranking. The work appears in the Proceedings of the Second BabyLM Workshop; the <a href="https://arxiv.org/abs/2611.07812">arXiv version</a> includes the same study and limitations.</p>
-        <p><strong>Inference:</strong> If a team adds more of one source, the score that matters should be the target task and the evaluation set—not a convenient average alone. A useful scaling experiment records words, tokens, vocabulary, compute and task-by-task results. Otherwise, the data budget may grow while the intended skill barely moves.</p>
-        <p><strong>Limits:</strong> This is a controlled study of two corpora and 58M student models, not a survey of all pretraining sources or frontier systems. Entity Tracking is synthetic, and even the authors note training-dynamics sensitivity. The result is a reason to test corpus fit, not proof that either historical or child-directed text is generally superior.</p>
+        <p>When a model misses a fact, the conventional response is often to add more training data or grow the model. But if the model has limited capacity and the training set contains many facts with a long-tailed frequency distribution, simply showing it everything can make factual recall worse. A new study tests a different lever: decide which facts get training attention.</p>
+        <h3>Too many facts can overfill the model’s memory budget</h3>
+        <p>In <a href="https://proceedings.mlr.press/v306/ye26e.html"><em>Cram Less to Fit More: Training Data Pruning Improves Memorization of Facts</em></a>, Jiayuan Ye, Vitaly Feldman and Kunal Talwar formalize a capacity limit for fact accuracy. Their controlled experiments find that once the information in the facts exceeds that capacity, standard training can fall short of the best achievable recall. A skewed frequency distribution—where a small set of facts dominates and many appear rarely—makes the gap worse.</p>
+        <p>The proposed selection methods use training loss as a proxy for how fact information is distributed. They aim to keep the number of facts within the model’s capacity and reduce frequency imbalance. On semi-synthetic, high-entropy fact datasets, the approach raises accuracy to the paper’s theoretical capacity limit. In annotated Wikipedia pretraining, a 110-million-parameter GPT-2 Small model selected on only a fraction of the factual material memorized 1.3 times as many entity facts as standard training; on that fact metric, it matched a 1.3-billion-parameter model trained on the full dataset.</p>
+        <p>The result is specific to factual memorization, not a claim that a smaller model is now better at every language task. The authors also measured knowledge-focused MMLU and general natural-language understanding. The knowledge subset improved more modestly and noisily; general NLU stayed roughly stable at most selection ratios, but dropped at the most aggressive 10% setting. The task target changes the best selection ratio: the paper reports about 20% for fact accuracy and 50% for knowledge-MMLU.</p>
+        <h3>The hidden cost: selection is not free</h3>
+        <p>There is a trade-off behind the headline. To select useful examples online, the method may need extra forward passes to gather enough candidates for each training batch. The paper says this increases training FLOPs per iteration. Its results focus on sufficient-training regimes and compare against longer full-data training; it leaves a strict, bounded-FLOP comparison as an open problem. The authors also grid-search the selection ratio, which adds tuning work.</p>
+        <p><strong>Evidence:</strong> In the reported Wikipedia experiment, data selection boosted fact accuracy and the knowledge-focused task while generally preserving NLU. The paper is in the 2026 Proceedings of Machine Learning Research and reports three runs for the 110M model’s fact-accuracy result.</p>
+        <p><strong>Inference:</strong> If the goal is reliable recall of a defined fact set, selective training may be worth testing before buying a larger model or collecting still more text. But compare end-to-end compute, selection overhead and tuning effort—not just the number of retained facts.</p>
+        <p><strong>Limits:</strong> The striking 1.3× result measures entity-fact memorization on an annotated Wikipedia setup. It does not prove improvements in open-ended reasoning, broad language quality or every domain. Fact selection also depends on annotated fact boundaries in the real-corpus experiment.</p>
         <section class="takeaway-box" aria-label="Bulleted breakdown">
           <h3>Bulleted breakdown</h3>
           <ul>
-            <li><strong>Same word budget, different sources.</strong> The study compares Britannica and BabyLM at 10M and 37M words under matched training procedures.</li>
-            <li><strong>Strengths split by task.</strong> BabyLM did better on linguistic acceptability; Britannica often did better on synthetic entity tracking.</li>
-            <li><strong>No single quality ladder emerged.</strong> The winner depended on which capability was measured.</li>
-            <li><strong>Words are not tokens.</strong> Corpus-specific vocabularies mean equal word budgets did not equalize token counts.</li>
-            <li><strong>Scale against the goal.</strong> Pair resource accounting with several held-out benchmarks tied to the intended use.</li>
+            <li><strong>Capacity matters.</strong> If a small model must encode too many facts, standard training may not reach its best possible fact accuracy.</li>
+            <li><strong>Frequency skew adds pressure.</strong> Common facts can crowd out rare but important facts.</li>
+            <li><strong>Targeted selection helped on a factual metric.</strong> The 110M model retained 1.3× more entity facts than standard training in the reported setup.</li>
+            <li><strong>General performance was not the same outcome.</strong> Knowledge-MMLU gains were noisier, and very aggressive selection hurt NLU.</li>
+            <li><strong>Count selection compute too.</strong> Extra forward passes and choosing a selection ratio affect the real cost.</li>
           </ul>
         </section>
-        <p class="story-close"><strong>The takeaway:</strong> A larger corpus can improve measured performance, but corpus content helps determine which performance. “Scale it” is incomplete advice until the team defines the task, counts the budget carefully and checks more than one outcome.</p>
+        <p class="story-close"><strong>The takeaway:</strong> More data is not automatically better when a model must encode more facts than it can reliably retain. Curating for the target can help—but evaluate the target, protect general capability and include selection overhead in the budget.</p>
+        <p class="why"><b>Why this matters:</b> The best data budget depends on what the model must learn and how expensive it is to identify the useful examples.</p>
       </div>
     </article>
 
     <section class="grid" id="supporting-stories" aria-label="Supporting stories">
       <h2 class="section-label">More signals from today’s research</h2>
-      <article class="card small"><span class="number">01 / HIDDEN ASSUMPTION</span><h2>Equal words did not mean equal tokens</h2><p>The paired study holds source-word budgets and procedures steady, but corpus-specific tokenizers produce different vocabularies and token counts.</p><p class="why"><b>Why this matters:</b> Report both words and tokens so “same-size dataset” does not conceal a different training exposure.</p><p class="source"><a href="https://aclanthology.org/2026.babylm-main.33/">Read the published paper ↗</a></p></article>
-      <article class="card small"><span class="number">02 / WRONG DIRECTION</span><h2>Replace “best corpus” with “best fit for this task”</h2><p>BabyLM and Britannica trade places across linguistic acceptability and Entity Tracking rather than forming one universal quality ranking.</p><p class="why"><b>Why this matters:</b> A score can rise on average while a capability the product needs remains weak.</p><p class="source"><a href="https://arxiv.org/abs/2611.07812">See the authors’ benchmark and control details ↗</a></p></article>
-      <article class="card wide"><span class="tag">After review · next validation</span><h2>Repeat the comparison on your own target skills</h2><p>The result supports multi-benchmark checks, but it covers two sources and small student models. Follow-up work should vary corpus pairs, tokenize under matched token budgets as well as word budgets, and repeat seeds on the metrics that matter in deployment.</p><p class="why"><b>Why this matters:</b> The follow-up separates real corpus effects from choices about vocabulary, exposure and a narrow benchmark.</p></article>
+      <article class="card small"><span class="number">01 / WRONG DIRECTION</span><h2>“Keep every fact” can work against small-model recall</h2><p>The paper’s capacity analysis and long-tail experiments suggest that more factual content can overload a model when its memory budget is limited.</p><p class="why"><b>Why this matters:</b> Increasing corpus size without checking fact coverage may spend training on information the model cannot retain reliably.</p><p class="source"><a href="https://proceedings.mlr.press/v306/ye26e.html">Read the ICML 2026 paper ↗</a></p></article>
+      <article class="card small"><span class="number">02 / HIDDEN COST</span><h2>Pruning saved facts, but selection added forward passes</h2><p>The authors note that candidate selection increases training FLOPs per iteration, and their experiments tune the retained fraction rather than assuming one setting works for every goal.</p><p class="why"><b>Why this matters:</b> Fewer training examples do not guarantee a cheaper training run once data-selection compute is counted.</p><p class="source"><a href="https://arxiv.org/html/2604.08519v1#D3">Review the paper’s computational-cost discussion ↗</a></p></article>
+      <article class="card wide"><span class="tag">After review · check the metric</span><h2>Fact recall improved more clearly than broad task scores</h2><p>The study reports stronger gains on fact accuracy, smaller and noisier gains on knowledge-focused MMLU, and mostly stable NLU except under the most aggressive selection. Follow-up evaluations should keep these outcomes separate.</p><p class="why"><b>Why this matters:</b> A data recipe can improve the objective it targets without improving every capability users care about.</p></article>
     </section>
+
 
 
 
 
     <section class="insights" aria-label="Quotes and reader question">
-      <article class="quote-card"><span class="tag">Quote 01 · workshop paper</span><blockquote>“different skill profiles rather than a single quality ranking”</blockquote><cite>— Vaira, Chavales &amp; Nugues, <a href="https://aclanthology.org/2026.babylm-main.33/">Different Corpora, Different Skills?</a></cite><p class="why"><b>Why this matters:</b> The corpus that helps one benchmark may not lead on another.</p></article>
-      <article class="quote-card"><span class="tag">Quote 02 · workshop paper</span><blockquote>“motivating multi-benchmark evaluation when comparing pretraining data”</blockquote><cite>— Vaira, Chavales &amp; Nugues, <a href="https://arxiv.org/abs/2611.07812">Different Corpora, Different Skills?</a></cite><p class="why"><b>Why this matters:</b> Several task checks make a data decision harder to overfit to one score.</p></article>
+      <article class="quote-card"><span class="tag">Quote 01 · ICML 2026</span><blockquote>“limit the number of facts in the training data”</blockquote><cite>— Ye, Feldman &amp; Talwar, <a href="https://proceedings.mlr.press/v306/ye26e.html">Cram Less to Fit More</a></cite><p class="why"><b>Why this matters:</b> Selection changes which knowledge competes for a model’s finite capacity.</p></article>
+      <article class="quote-card"><span class="tag">Quote 02 · ICML 2026</span><blockquote>“without harming general natural language understanding”</blockquote><cite>— Ye, Feldman &amp; Talwar, <a href="https://arxiv.org/html/2604.08519v1">Cram Less to Fit More · Wikipedia experiments</a></cite><p class="why"><b>Why this matters:</b> That result held for most tested selection ratios, not the most aggressive one.</p></article>
       <article class="reader-question" id="reader-question">
-        <span class="tag">Reader question</span><p>Two corpora use the same word budget, but each wins on different benchmark skills. What is the soundest conclusion?</p>
+        <span class="tag">Reader question</span><p>A small model must recall a long-tailed set of facts. What would be the most careful next experiment?</p>
         <fieldset class="mcq" aria-describedby="answer-feedback"><legend class="sr-only">Choose one answer</legend>
-          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">A. Pick whichever corpus wins the average score; its strengths will transfer to every task.</button>
-          <button class="mcq-option" type="button" data-correct="true" aria-pressed="false">B. Corpus choice changes skill profiles here; compare task fit and account for words and tokens.</button>
-          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">C. Equal word counts guarantee equal training exposure, so only the model size can explain differences.</button>
-        </fieldset><p class="answer-feedback" id="answer-feedback" role="status" aria-live="polite">Choose an answer to see feedback.</p>
+          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">A. Train on every available fact; more examples always improve factual recall, regardless of model capacity.</button>
+          <button class="mcq-option" type="button" data-correct="true" aria-pressed="false">B. Test loss-based fact selection at several ratios, measuring fact recall, general tasks and total training FLOPs.</button>
+          <button class="mcq-option" type="button" data-correct="false" aria-pressed="false">C. Keep only 10% of the data; the smallest selection ratio must produce the best overall model.</button>
+        </fieldset><p class="answer-feedback" id="answer-feedback" role="status" aria-live="polite">Choose an answer to see feedback.</p><p class="why"><b>Why this matters:</b> The useful selection level depends on the model’s target and capacity, and selection itself has a cost.</p>
       </article>
     </section>
-    <aside class="community"><div><strong>From the developer community</strong><p>Browse the authors’ open code for the single-cell data-scaling study, or use its issue tracker to discuss reproduction and evaluation choices.</p></div><a href="https://github.com/microsoft/scFM-dataselection/issues">Open the research code discussion ↗</a></aside>
+    <aside class="community"><div><strong>From the developer community</strong><p>Open the paper-notes thread to discuss the method, its factuality target and the extra compute involved in selection.</p></div><a href="https://github.com/AkihikoWatanabe/paper_notes/issues/5432">Join the paper discussion ↗</a></aside>
+    
+
     
 
     
@@ -205,8 +209,8 @@
       option.setAttribute('aria-pressed', 'true');
       feedback.className = `answer-feedback ${isCorrect ? 'correct' : 'incorrect'}`;
       feedback.textContent = isCorrect
-        ? 'Correct. Compare the exact task scores, and remember that matched words did not mean matched token counts in this study.'
-        : 'Not quite. A single average can hide skill differences, and equal word counts do not guarantee equal token exposure.';
+        ? 'Correct. Measure factual accuracy, broader task scores and the forward-pass or tuning cost across selection ratios.'
+        : 'Not quite. More facts can exceed a small model’s capacity, and an extreme pruning ratio can damage general task performance.';
     }));
   </script>
 </body>
